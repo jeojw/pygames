@@ -1,5 +1,6 @@
 import main
 import LifeObject
+import Projectile
 
 class PlayerObject(LifeObject):
     def __init__(self, x_pos, y_pos=None):
