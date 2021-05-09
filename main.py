@@ -96,10 +96,7 @@ DETECTICON = pygame.image.load('effect_icon/detectIcon.png')
 '''
 오브젝트 관련 리스트 및 변수 -> 이 리스트들을 GameStage 클래스 내부에 조만간 편입시켜야 할듯.
 '''
-Enemylist = [] # 화면에 그릴 적 리스트
 ItemTypes = [ICE, ARMOR, HASTE, ATTACKSPEED, HPRECOVERY, MAXHPUP] # 아이템 타입, 주로 스프라이트 파일로 통해 아이템 획득을 구분할 예정
-Itemlist = [] # 아이템을 담는 리스트
-ProjectileList = []
 
 '''
 기본적인 스텟 함수
@@ -164,6 +161,11 @@ stage_2_map = pygame.image.load('map_images/stage_2_map.png')
 stage_1_scale = pygame.transform.scale(stage_1_map, (map_x_size, map_y_size))
 stage_2_scale = pygame.transform.scale(stage_2_map, (map_x_size, map_y_size))
 
+Clock = pygame.time.Clock()
+Screen = pygame.display.set_mode((x_size, y_size))
+BigFont = pygame.font.SysFont('notosanscjkkrblack', 70)
+SmallFont = pygame.font.SysFont('notosanscjkkrblack', 40)
+
 def rungame(Stage):
     while True:
         dt = Clock.tick(60) / 1000 # 스프라이트 업데이트 주기 함수
@@ -183,7 +185,7 @@ def rungame(Stage):
                 elif (event.key == pygame.K_x):
                     Stage.GetPlayer().attack()
                 elif (event.key == pygame.K_z): #아이템 획득 키
-                    Stage.GetPlayer().getItem()
+                    Stage.GetPlayer().getItem(Stage)
                 elif (event.key == pygame.K_g):
                     pass
                 elif (event.key == pygame.K_ESCAPE):
@@ -213,17 +215,17 @@ def rungame(Stage):
                     projectile.GetPos(X) + projectile.GetSize(WIDTH) >= MAP_LIMIT_RIGHT):
                     Stage.GetPlayer().GetProjectiles().remove(projectile)
             
-        for enemy in Enemylist:
-            if (len(Enemylist) != 0):
-                if (len(ProjectileList) != 0):
-                    for projectile in ProjectileList:
+        for enemy in Stage.GetEnemylist():
+            if (len(Stage.GetEnemylist()) != 0):
+                if (len(Stage.GetEnemyProjectiles()) != 0):
+                    for projectile in Stage.GetEnemyProjectiles():
                         projectile.updatePos(Stage)
                         projectile.draw()
                 enemy.update(dt * 15, Stage)
                 enemy.draw()
                 
-        for item in Itemlist:
-            if (len(Itemlist) != 0):
+        for item in Stage.GetItemlist():
+            if (len(Stage.GetItemlist()) != 0):
                 item.updatePos(Stage)
                 item.draw()
         
@@ -235,24 +237,19 @@ def rungame(Stage):
             Stage.ClearScreen()
             return False
 
-        write(SmallFont, str(Enemylist[0].delayElapsed) + '   ' + str(Enemylist[0].coolElapsed), BLACK, 350, 20)
+        write(SmallFont, str(Stage.XCameraMoveable) + '   ' + str(Stage.isXCameraMove), BLACK, 350, 20)
         pygame.display.update()
         Clock.tick(FPS)
         
 def main():
-    global Clock, Screen, BigFont, SmallFont
     pygame.init()
-    Clock = pygame.time.Clock()
-    Screen = pygame.display.set_mode((x_size, y_size))
-    BigFont = pygame.font.SysFont('notosanscjkkrblack', 70)
-    SmallFont = pygame.font.SysFont('notosanscjkkrblack', 40)
     
     pygame.display.set_caption("Adventure")
     
     level = 1
     score = 0
     while True:
-        Stage = GameStage(level, score)
+        Stage = GameStage.GameStage(level, score)
         Stage.SetStage()
         if (level == 1):
             Stage.OpeningScreen()

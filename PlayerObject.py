@@ -1,8 +1,139 @@
 import main
 import LifeObject
 import Projectile
+import pygame
 
-class PlayerObject(LifeObject):
+pygame.init() # pygame 초기화
+
+'''
+맵 관련 변수
+'''
+MAP_GROUND = 465
+MAP_HEIGHT = 0
+MAP_LIMIT_LEFT = 0
+MAP_LIMIT_RIGHT = 800
+
+CAMERAXMARGIN = 250
+CAMERAYMARGIN = 200
+
+JUMPDISTANCE = 80
+AIRSPACE = -10
+GRAVITY = 10
+DURATION = 20
+AMMUNITION = 30
+
+'''
+오브젝트 관련 변수
+'''
+PLAYERATKCOOL = 1
+PLYAERRANGE = 300
+POLARBEARATTACKRANGE = 0
+
+'''
+오브젝트의 스텟 관련 변수
+'''
+MAXHP = 'maxhp'
+HP = 'hp'
+ATK = 'atk'
+DEF = 'def'
+SPEED = 'speed'
+
+'''
+오브젝트의 컨디션 관련 전역변수
+'''
+LEFT = 'left'
+RIGHT = 'right'
+DIRECTION = 'direction'
+STATIC = 'static'
+WALK = 'walk'
+ATTACK = 'attack'
+GETATTACK = 'getattack'
+DEAD = 'dead'
+HITBOX = 'hitbox'
+ATKHITBOX = 'atkhitbox'
+ONGROUND = 'onground'
+
+'''
+히트박스 사이즈 및 위치 전역변수
+'''
+X = 'x'
+Y = 'y'
+WIDTH = 'width'
+HEIGHT = 'height'
+
+'''
+아이템 아이콘, 이펙트 관련 변수
+'''
+ICE = 'char_sprite/ice.png'
+ARMOR = 'items/shield.png'
+HASTE = 'items/haste.png'
+ATTACKSPEED = 'items/attackspeed.png'
+HPRECOVERY = 'items/hprecovery.png'
+MAXHPUP = 'items/hpmaxup.png'
+COIN = 'items/coin.png'
+
+BASIC = 'char_sprite/bubble.png'
+REINFORCE = 'char_sprite/ice.png'
+
+SNOWBALL = 'enemy_sprite/SnowMan_sprite/snowball.png'
+
+ICEICON = pygame.image.load(ICE)
+ARMORICON = pygame.image.load(ARMOR)
+HASTEICON = pygame.image.load(HASTE)
+ATTACKSPEEDICON = pygame.image.load(ATTACKSPEED)
+HPRECOVERYICON = pygame.image.load(HPRECOVERY)
+MAXHPUPICON = pygame.image.load(MAXHPUP)
+COINICON = pygame.image.load(COIN)
+
+'''
+기본적인 스텟 함수
+'''
+PlayerStat = [750, 750, 1000, 0, 10]
+
+'''
+아이템 획득 시 스텟 변환 리스트
+'''
+ICEStat = [0, 0, 100, 0, 0, 1]
+ARMORStat = [0, 0, 0, 20, 0, 1]
+HASTEStat = [0, 0, 0, 0, 5, 1]
+ATTACKSPEEDStat = [0, 0, 0, 0, 0, 1.5]
+MAXHPUPStat = [250, 0, 0, 0, 0, 1]
+
+'''
+텍스트 작성 함수
+'''
+Font = pygame.font.SysFont('굴림', 40)
+
+def write(Font, Text, color, x_pos, y_pos):
+    surface = Font.render(Text, True, color)
+    rect = surface.get_rect()
+    Screen.blit(surface, (x_pos, y_pos))
+
+'''
+기본적인 색상
+'''
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+BLUE = (0, 0, 255)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+VIRGINRED = (204, 0, 0)
+
+'''
+기본적인 시스템 변수 설정
+'''
+x_size = 800
+y_size = 600
+
+map_x_size = 2400
+map_y_size = 1000
+
+Clock = pygame.time.Clock()
+Screen = pygame.display.set_mode((x_size, y_size))
+BigFont = pygame.font.SysFont('notosanscjkkrblack', 70)
+SmallFont = pygame.font.SysFont('notosanscjkkrblack', 40)
+
+class PlayerObject(LifeObject.LifeObject):
     def __init__(self, x_pos, y_pos=None):
         '''
         플레이어의 기본적인 정보를 설정하는 생성자
@@ -90,17 +221,17 @@ class PlayerObject(LifeObject):
             self.ammunition -= 1
         if (self.isDead is False and self.isGetattack is False and self.coolElapsed == 0):
             if (self.direction == LEFT):
-                self.projectilelist.append(Projectile(self.projectileimage, self.hitbox.left, self.hitbox.y, self.ATK, LEFT))
+                self.projectilelist.append(Projectile.Projectile(self.projectileimage, self.hitbox.left, self.hitbox.y, self.ATK, LEFT))
             else:
-                self.projectilelist.append(Projectile(self.projectileimage, self.hitbox.right, self.hitbox.y, self.ATK, RIGHT))
+                self.projectilelist.append(Projectile.Projectile(self.projectileimage, self.hitbox.right, self.hitbox.y, self.ATK, RIGHT))
                  
-    def getItem(self):
+    def getItem(self, Stage):
         '''
         아이템을 얻게 해주는 메서드 아이템 종류에 따라 효과가 다르게 발동되도록 변경
         '''
-        for item in Itemlist:
+        for item in Stage.GetItemlist():
             if (self.checkcollision(item)):
-                Itemlist.remove(item)
+                Stage.removeItem(item)
                 self.getitem = True
                 if (item.GetImage() != COIN):
                     self.isChangeStat = True
@@ -181,7 +312,7 @@ class PlayerObject(LifeObject):
             Screen.blit(ATTACKSPEEDICON, (Length + 20, 15))
             write(SmallFont, ' : ' + str(self.duration - self.itemElapsed) + ' sec ', BLACK, Length + 40, 15)
             
-    def updateCondition(self):
+    def updateCondition(self, Stage):
         '''
         플레어어의 컨디션을 업데이트 시켜주는 함수
         불값을 기반으로 업데이트 시켜줌
@@ -189,17 +320,17 @@ class PlayerObject(LifeObject):
         아이템 관련 및 피격까지 관리함
         '''
         super().updateCondition()
-        for enemy in Enemylist:
+        for enemy in Stage.GetEnemylist():
             if (self.isHitbox):
                 if (self.checkcollision(enemy) and enemy.GetCondition(ATKHITBOX)):
                     self.getattack(enemy)
                     
-        for projectile in ProjectileList:
-            if (len(ProjectileList) != 0):
+        for projectile in Stage.GetEnemyProjectiles():
+            if (len(Stage.GetEnemyProjectiles()) != 0):
                 if (self.isHitbox):
                     if (self.checkcollision(projectile)):
                         self.getattack(enemy)
-                        ProjectileList.remove(projectile)
+                        Stage.GetEnemyProjectiles().remove(projectile)
                     
         if (self.isChangeStat):
             if (self.itemType == ICE):
@@ -267,3 +398,12 @@ class PlayerObject(LifeObject):
                 self.x_pos += -self.SPEED
             elif (self.direction == RIGHT):
                 self.x_pos += self.SPEED
+                
+    def update(self, dt, Stage):
+        '''
+        통합 update 메서드
+        가독성을 위해
+        '''
+        self.updateCondition(Stage)
+        self.updatePos(Stage)
+        self.updateSprite(dt)
