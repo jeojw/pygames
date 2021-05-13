@@ -1,74 +1,24 @@
-import main
 import random
 import LifeObject
 import ItemObject
 import Projectile
+import GameSystem
 import pygame
 
 pygame.init() # pygame 초기화
 
 '''
-맵 관련 변수
-'''
-MAP_GROUND = 465
-MAP_HEIGHT = 0
-MAP_LIMIT_LEFT = 0
-MAP_LIMIT_RIGHT = 800
-XMARGIN = 200
-YMARGIN = 0
-
-CAMERAXMARGIN = 250
-CAMERAYMARGIN = 200
-
-JUMPDISTANCE = 80
-AIRSPACE = -10
-GRAVITY = 10
-DURATION = 20
-AMMUNITION = 30
-
-'''
 오브젝트 관련 변수
 '''
-PLAYERATKCOOL = 1
 ENEMYATKCOOL = 1
 
 SEALATTACKRANGE = 75
 SNOWMANATTACKDISTANCE = 200
 SNOWBALLRANGE = 300
-PLYAERRANGE = 300
 POLARBEARATTACKRANGE = 0
 
-'''
-오브젝트의 스텟 관련 변수
-'''
-MAXHP = 'maxhp'
-HP = 'hp'
-ATK = 'atk'
-DEF = 'def'
-SPEED = 'speed'
-
-'''
-오브젝트의 컨디션 관련 전역변수
-'''
-LEFT = 'left'
-RIGHT = 'right'
-DIRECTION = 'direction'
-STATIC = 'static'
-WALK = 'walk'
-ATTACK = 'attack'
-GETATTACK = 'getattack'
-DEAD = 'dead'
-HITBOX = 'hitbox'
-ATKHITBOX = 'atkhitbox'
-ONGROUND = 'onground'
-
-'''
-히트박스 사이즈 및 위치 전역변수
-'''
-X = 'x'
-Y = 'y'
-WIDTH = 'width'
-HEIGHT = 'height'
+SNOWBALL = 'enemy_sprite/SnowMan_sprite/snowball.png'
+DETECTICON = pygame.image.load('effect_icon/detectIcon.png')
 
 '''
 아이템 아이콘, 이펙트 관련 변수
@@ -81,33 +31,7 @@ HPRECOVERY = 'items/hprecovery.png'
 MAXHPUP = 'items/hpmaxup.png'
 COIN = 'items/coin.png'
 
-BASIC = 'char_sprite/bubble.png'
-REINFORCE = 'char_sprite/ice.png'
-
-SNOWBALL = 'enemy_sprite/SnowMan_sprite/snowball.png'
-
-ICEICON = pygame.image.load(ICE)
-ARMORICON = pygame.image.load(ARMOR)
-HASTEICON = pygame.image.load(HASTE)
-ATTACKSPEEDICON = pygame.image.load(ATTACKSPEED)
-HPRECOVERYICON = pygame.image.load(HPRECOVERY)
-MAXHPUPICON = pygame.image.load(MAXHPUP)
-COINICON = pygame.image.load(COIN)
-
-DETECTICON = pygame.image.load('effect_icon/detectIcon.png')
-
-'''
-오브젝트 관련 리스트 및 변수 -> 이 리스트들을 GameStage 클래스 내부에 조만간 편입시켜야 할듯.
-'''
 ItemTypes = [ICE, ARMOR, HASTE, ATTACKSPEED, HPRECOVERY, MAXHPUP] # 아이템 타입, 주로 스프라이트 파일로 통해 아이템 획득을 구분할 예정
-
-'''
-기본적인 스텟 함수
-'''
-PlayerStat = [750, 750, 1000, 0, 10]
-EnemyStatdic = {'Seal': [2500, 2500, 80, 20, 4.5],
-                'SnowMan': [2000, 2000, 120, 0, 3],
-                'PolarBear': [4500, 4500, 180, 60, 3]}
 
 '''
 적 타입 및 이름을 나타내는 변수
@@ -118,65 +42,14 @@ BOSS = 'Boss'
 SEAL = 'Seal'
 SNOWMAN = 'SnowMan'
 POLARBEAR = 'PolarBear'
-
-'''
-아이템 획득 시 스텟 변환 리스트
-'''
-ICEStat = [0, 0, 100, 0, 0, 1]
-ARMORStat = [0, 0, 0, 20, 0, 1]
-HASTEStat = [0, 0, 0, 0, 5, 1]
-ATTACKSPEEDStat = [0, 0, 0, 0, 0, 1.5]
-MAXHPUPStat = [250, 0, 0, 0, 0, 1]
-
-'''
-텍스트 작성 함수
-'''
-Font = pygame.font.SysFont('굴림', 40)
-
-def write(Font, Text, color, x_pos, y_pos):
-    surface = Font.render(Text, True, color)
-    rect = surface.get_rect()
-    Screen.blit(surface, (x_pos, y_pos))
-
-'''
-기본적인 색상
-'''
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-BLUE = (0, 0, 255)
-GREEN = (0, 255, 0)
-RED = (255, 0, 0)
-VIRGINRED = (204, 0, 0)
-
-'''
-기본적인 시스템 변수 설정
-'''
-x_size = 800
-y_size = 600
-FPS = 60
-
-map_x_size = 2400
-map_y_size = 1000
-
-# make enemylist!!!
-stage_1_map = pygame.image.load('map_images/stage_1_map.png')
-stage_2_map = pygame.image.load('map_images/stage_2_map.png')
-stage_1_scale = pygame.transform.scale(stage_1_map, (map_x_size, map_y_size))
-stage_2_scale = pygame.transform.scale(stage_2_map, (map_x_size, map_y_size))
-
-Clock = pygame.time.Clock()
-Screen = pygame.display.set_mode((x_size, y_size))
-BigFont = pygame.font.SysFont('notosanscjkkrblack', 70)
-SmallFont = pygame.font.SysFont('notosanscjkkrblack', 40)
-
 class EnemyObject(LifeObject.LifeObject):
-    def __init__(self, Name, Type, x_pos, y_pos=None):
+    def __init__(self, Name, Type, System, x_pos, y_pos=None):
         '''
         적의 기본적인 정보를 저장하는 생성자
         '''
-        super().__init__(x_pos, y_pos)
+        super().__init__(System, x_pos, y_pos)
         
-        self.direction = RIGHT
+        self.direction = 'right'
         self.Name = Name
         self.Type = Type
         self.isDrop = False # 아이템 드랍 관련 불값
@@ -225,7 +98,7 @@ class EnemyObject(LifeObject.LifeObject):
             else:
                 raise ValueError
         except ValueError:
-            print('Not Pos!!!!')
+            print(pos, 'is not Pos!!!!')
         
     def GetSize(self, length):
         '''
@@ -239,7 +112,7 @@ class EnemyObject(LifeObject.LifeObject):
             else:
                 raise ValueError
         except ValueError:
-            print('Not Lenght!!!')
+            print(length, 'is not Lenght!!!')
             
     def GetName(self):
         return self.Name
@@ -251,10 +124,10 @@ class EnemyObject(LifeObject.LifeObject):
         super().attack()
         if (self.Name == SNOWMAN):
             if (self.isDead is False and self.isGetattack is False and self.coolElapsed == 0):
-                if (self.direction == LEFT):
-                    Stage.appendProjectile(Projectile.Projectile(self.projectileimage, self.hitbox.left, MAP_GROUND - 50, self.ATK, LEFT))
+                if (self.direction == 'left'):
+                    Stage.appendProjectile(Projectile.Projectile(self.projectileimage, self.hitbox.left, Stage.GetMapLimit('onground') - 50, self.ATK, 'left'))
                 else:
-                    Stage.appendProjectile(Projectile.Projectile(self.projectileimage, self.hitbox.right, MAP_GROUND - 50, self.ATK, RIGHT))
+                    Stage.appendProjectile(Projectile.Projectile(self.projectileimage, self.hitbox.right, Stage.GetMapLimit('onground') - 50, self.ATK, 'right'))
             
 
     def dropItem(self, Stage):
@@ -292,7 +165,7 @@ class EnemyObject(LifeObject.LifeObject):
         기본적의 적의 AI
         플레이어에 상태에 따라서 업데이트가 된다
         '''
-        distance = self.hitbox.centerx - (Stage.GetPlayer().GetPos(X) + Stage.GetPlayer().GetSize(WIDTH) / 2) #플레이어와 적과의 거리를 계산함
+        distance = self.hitbox.centerx - (Stage.GetPlayer().GetPos('x') + Stage.GetPlayer().GetSize('width') / 2) #플레이어와 적과의 거리를 계산함
         if (abs(distance) <= 400 or self.HP != self.MAXHP):
             self.detectPlayer()
             
@@ -303,7 +176,7 @@ class EnemyObject(LifeObject.LifeObject):
                 self.rightwalk()
                 
         if (abs(distance) <= self.attackRange):
-            if (Stage.GetPlayer().GetCondition(HITBOX)):
+            if (Stage.GetPlayer().GetCondition('hitbox')):
                 if (self.coolElapsed != 0 and self.checkcollision(Stage.GetPlayer())):
                     self.static()
                 self.attack(Stage)
@@ -316,7 +189,7 @@ class EnemyObject(LifeObject.LifeObject):
                         self.getattack(Stage.GetPlayer())
                         Stage.GetPlayer().GetProjectiles().remove(projectile)
                         
-        if (Stage.GetPlayer().GetCondition(DEAD)):
+        if (Stage.GetPlayer().GetCondition('dead')):
             self.static()
 
         if (self.isDead and self.isDrop is False):
@@ -324,7 +197,7 @@ class EnemyObject(LifeObject.LifeObject):
             self.isDrop = True
     
     def AI_2(self, Stage):
-        distance = self.hitbox.centerx - (Stage.GetPlayer().GetPos(X) + Stage.GetPlayer().GetSize(WIDTH) / 2) #플레이어와 적과의 거리를 계산함
+        distance = self.hitbox.centerx - (Stage.GetPlayer().GetPos('x') + Stage.GetPlayer().GetSize('width') / 2) #플레이어와 적과의 거리를 계산함
         if (abs(distance) <= 400 or self.HP != self.MAXHP):
             self.detectPlayer()
             
@@ -335,10 +208,11 @@ class EnemyObject(LifeObject.LifeObject):
                 self.rightwalk()
                 
         if (abs(distance) <= self.attackDistance):
-            if (Stage.GetPlayer().GetCondition(HITBOX)):
+            if (Stage.GetPlayer().GetCondition('hitbox')):
                 if (self.coolElapsed != 0):
                     self.static()
-                self.attack(Stage)
+                else:
+                    self.attack(Stage)
 
         for projectile in Stage.GetPlayer().GetProjectiles():
             if (len(Stage.GetPlayer().GetProjectiles()) != 0):
@@ -348,7 +222,7 @@ class EnemyObject(LifeObject.LifeObject):
                         self.getattack(Stage.GetPlayer())
                         Stage.GetPlayer().GetProjectiles().remove(projectile)
                         
-        if (Stage.GetPlayer().GetCondition(DEAD)):
+        if (Stage.GetPlayer().GetCondition('dead')):
             self.static()
 
         if (self.isDead and self.isDrop is False):
@@ -360,16 +234,16 @@ class EnemyObject(LifeObject.LifeObject):
     def drawEffect(self):
         if (self.isDetect):
             if (self.effectElapsed != 0):
-                Screen.blit(DETECTICON, (self.x_pos - 30, self.hitbox.top - 30))
+                self.system.GetScreen().blit(DETECTICON, (self.x_pos - 30, self.hitbox.top - 30))
 
     def drawStat(self):
         if (self.Type == NORMAL):
             Length = 125
             convertCoefficient = Length / self.MAXHP
-            pygame.draw.rect(Screen, VIRGINRED, (self.hitbox.centerx - Length / 2,
+            pygame.draw.rect(self.system.GetScreen(), self.system.GetColor('virginred'), (self.hitbox.centerx - Length / 2,
                                              self.hitbox.bottom + 18, Length, 12), 3)
             if (self.HP >= 0):
-                pygame.draw.rect(Screen, RED, (self.hitbox.centerx - Length / 2,
+                pygame.draw.rect(self.system.GetScreen(), self.system.GetColor('red'), (self.hitbox.centerx - Length / 2,
                                                self.hitbox.bottom + 19, self.HP * convertCoefficient, 9))
         elif (self.Type == BOSS):
             Length = 300
@@ -379,37 +253,37 @@ class EnemyObject(LifeObject.LifeObject):
         '''
         오브젝트의 위치를 업데이트 시키는 메서드
         '''
-        PlayerDirection = Stage.GetPlayer().GetCondition(DIRECTION)
-        PlayerSpeed = Stage.GetPlayer().GetStat(SPEED)
+        PlayerDirection = Stage.GetPlayer().GetCondition('direction')
+        PlayerSpeed = Stage.GetPlayer().GetStat('speed')
         
         self.hitbox.x = self.x_pos
         self.hitbox.bottom = self.y_pos
 
         if (self.isWalk and self.isAttack is False):
-            if (self.direction == LEFT):
+            if (self.direction == 'left'):
                 self.x_pos += -self.SPEED
-            elif (self.direction == RIGHT):
+            elif (self.direction == 'right'):
                 self.x_pos += self.SPEED
         
         if (Stage.XCameraMoveable and (Stage.isXCameraMove or Stage.forceXMove)):
-            if (PlayerDirection == LEFT):
+            if (PlayerDirection == 'left'):
                 self.x_pos += PlayerSpeed
-            elif (PlayerDirection == RIGHT):
+            elif (PlayerDirection == 'right'):
                 self.x_pos -= PlayerSpeed
         
-        elif (not Stage.isXCameraMove and (self.x_pos <= x_size and self.x_pos >= 0)):
-            if (self.hitbox.left <= MAP_LIMIT_LEFT):
-                self.x_pos = MAP_LIMIT_LEFT #좌표 보정인데.... 오류라서
-            if (self.hitbox.right >= MAP_LIMIT_RIGHT):
-                self.x_pos = MAP_LIMIT_RIGHT - self.hitbox.width
+        elif (not Stage.isXCameraMove and (self.x_pos <= self.system.GetXSize() and self.x_pos >= 0)):
+            if (self.hitbox.left <= 0):
+                self.x_pos = 0 #좌표 보정인데.... 오류라서
+            if (self.hitbox.right >= self.system.GetXSize()):
+                self.x_pos = self.system.GetXSize() - self.hitbox.width
                     
-        if (not Stage.GetPlayer().GetCondition(ONGROUND)):
+        if (not Stage.GetPlayer().GetCondition('onground')):
             if (Stage.GetPlayer().airSpace != 0):
                 self.y_pos -= Stage.GetPlayer().airSpace
             else:
                 self.y_pos -= Stage.GetPlayer().gravity
         else:
-            self.y_pos = MAP_GROUND
+            self.y_pos = 465
             
     def updateSprite(self, dt):# 추후 아이템 획득시에도 스프라이트 관련 업데이트를 추가할 것
         '''
@@ -417,7 +291,7 @@ class EnemyObject(LifeObject.LifeObject):
         스프라이트 업데이트 지연까지 추가함
         '''
         super().updateSprite(dt)
-        if (self.direction == LEFT):
+        if (self.direction == 'left'):
             self.hitbox = self.cursprite.get_rect(bottomright=(self.x_pos + 70, self.y_pos)) #방향전환시 좌표오류를 잡아줌
         else:
             self.hitbox = self.cursprite.get_rect(bottomleft=(self.x_pos, self.y_pos))

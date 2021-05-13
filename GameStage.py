@@ -3,161 +3,61 @@ import PlayerObject
 import EnemyObject
 import sys
 import pygame
+import GameSystem
 
 pygame.init() # pygame 초기화
 
 '''
 맵 관련 변수
 '''
-MAP_GROUND = 465
-MAP_HEIGHT = 0
-MAP_LIMIT_LEFT = 0
-MAP_LIMIT_RIGHT = 800
 XMARGIN = 200
-YMARGIN = 0
-
-CAMERAXMARGIN = 250
-CAMERAYMARGIN = 200
 
 '''
 오브젝트 관련 변수
 '''
-PLAYERATKCOOL = 1
-ENEMYATKCOOL = 1
-
-SEALATTACKRANGE = 75
-SNOWMANATTACKDISTANCE = 200
 SNOWBALLRANGE = 300
-PLYAERRANGE = 300
-POLARBEARATTACKRANGE = 0
-
-'''
-오브젝트의 스텟 관련 변수
-'''
-MAXHP = 'maxhp'
-HP = 'hp'
-ATK = 'atk'
-DEF = 'def'
-SPEED = 'speed'
-
-'''
-오브젝트의 컨디션 관련 전역변수
-'''
-LEFT = 'left'
-RIGHT = 'right'
-DIRECTION = 'direction'
-STATIC = 'static'
-WALK = 'walk'
-ATTACK = 'attack'
-GETATTACK = 'getattack'
-DEAD = 'dead'
-HITBOX = 'hitbox'
-ATKHITBOX = 'atkhitbox'
-ONGROUND = 'onground'
-
-'''
-히트박스 사이즈 및 위치 전역변수
-'''
-X = 'x'
-Y = 'y'
-WIDTH = 'width'
-HEIGHT = 'height'
 
 '''
 아이템 아이콘, 이펙트 관련 변수
 '''
-ICE = 'char_sprite/ice.png'
-ARMOR = 'items/shield.png'
-HASTE = 'items/haste.png'
-ATTACKSPEED = 'items/attackspeed.png'
-HPRECOVERY = 'items/hprecovery.png'
-MAXHPUP = 'items/hpmaxup.png'
-COIN = 'items/coin.png'
-
-BASIC = 'char_sprite/bubble.png'
-REINFORCE = 'char_sprite/ice.png'
-
-SNOWBALL = 'enemy_sprite/SnowMan_sprite/snowball.png'
-
-ICEICON = pygame.image.load(ICE)
-ARMORICON = pygame.image.load(ARMOR)
-HASTEICON = pygame.image.load(HASTE)
-ATTACKSPEEDICON = pygame.image.load(ATTACKSPEED)
-HPRECOVERYICON = pygame.image.load(HPRECOVERY)
-MAXHPUPICON = pygame.image.load(MAXHPUP)
-COINICON = pygame.image.load(COIN)
-
-'''
-기본적인 스텟 함수
-'''
-PlayerStat = [750, 750, 1000, 0, 10]
-EnemyStatdic = {'Seal': [2500, 2500, 80, 20, 4.5],
-                'SnowMan': [2000, 2000, 120, 0, 3],
-                'PolarBear': [4500, 4500, 180, 60, 3]}
-
-'''
-적 타입 및 이름을 나타내는 변수
-'''
-NORMAL = 'Normal'
-BOSS = 'Boss'
-
-SEAL = 'Seal'
-SNOWMAN = 'SnowMan'
-POLARBEAR = 'PolarBear'
-
-'''
-텍스트 작성 함수
-'''
-Font = pygame.font.SysFont('굴림', 40)
-
-def write(Font, Text, color, x_pos, y_pos):
-    surface = Font.render(Text, True, color)
-    rect = surface.get_rect()
-    Screen.blit(surface, (x_pos, y_pos))
-
-'''
-기본적인 색상
-'''
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-BLUE = (0, 0, 255)
-GREEN = (0, 255, 0)
-RED = (255, 0, 0)
-VIRGINRED = (204, 0, 0)
-
-'''
-기본적인 시스템 변수 설정
-'''
-x_size = 800
-y_size = 600
-FPS = 60
-
-map_x_size = 2400
-map_y_size = 1000
+ICEICON = pygame.image.load('char_sprite/ice.png')
+ARMORICON = pygame.image.load('items/shield.png')
+HASTEICON = pygame.image.load('items/haste.png')
+ATTACKSPEEDICON = pygame.image.load('items/attackspeed.png')
+HPRECOVERYICON = pygame.image.load('items/hprecovery.png')
+MAXHPUPICON = pygame.image.load('items/hpmaxup.png')
+COINICON = pygame.image.load('items/coin.png')
 
 # make enemylist!!!
 stage_1_map = pygame.image.load('map_images/stage_1_map.png')
 stage_2_map = pygame.image.load('map_images/stage_2_map.png')
-stage_1_scale = pygame.transform.scale(stage_1_map, (map_x_size, map_y_size))
-stage_2_scale = pygame.transform.scale(stage_2_map, (map_x_size, map_y_size))
-
-Clock = pygame.time.Clock()
-Screen = pygame.display.set_mode((x_size, y_size))
-BigFont = pygame.font.SysFont('notosanscjkkrblack', 70)
-SmallFont = pygame.font.SysFont('notosanscjkkrblack', 40)
+maplist = [stage_1_map, stage_2_map]
 
 class GameStage(object):
     '''
     해당 클래스는 게임 스테이지를 구현시켜주는 클래스로, 여기에서 스테이지 진행, 게임오버 화면, 클리어 화면, 오프닝, 카메라 뷰 등을 모두 다룸
     '''
-    def __init__(self, stage, score):
+    def __init__(self, system, stage, score):
         '''
         스테이지의 기본적인 시스템
         '''
+        
+        self.MAP_LIMIT_LEFT = 0
+        self.MAP_LIMIT_RIGHT = 800
+        self.MAP_GROUND = 465
+        self.MAP_HEIGHT = 0
+        self.CAMERAXMARGIN = 200
+        self.CAMERAYMARGIN = 0
+        
+        self.map_x_size = 2400
+        self.map_y_size = 1000
+        
+        self.system = system
         self.stage = stage # 스테이지 설정
         self.totalScore = score
         self.curScore = 0
-        self.mapImages = [stage_1_scale, stage_2_scale] # 스테이지 맵 이미지
+        self.mapImages = [pygame.transform.scale(stage_map, (self.map_x_size, self.map_y_size))
+                          for stage_map in maplist] # 스테이지 맵 이미지
         
         self.PLAYER = None # 스테이지 내에 그려질 플레이어
         self.ClearStage = False # 스테이지가 클리어 됬는지 아닌지 판별하는 불값
@@ -166,25 +66,65 @@ class GameStage(object):
         self.isXCameraMove = False # 지금 카메라가 작동하고 있는지 판별시켜주는 불값
         self.forceXMove = False # 모든 적이 죽었르 경우 발동되는 불값
         self.isYCameraMove = False
-        self.CameraDirection = LEFT # 카메라 방향
+        self.CameraDirection = 'left' # 카메라 방향
         self.Deadboollist = [] # 적 전체의 사망 판정을 관리하는 리스트
-        self.Deadbooldic = {NORMAL: list(),
-                            BOSS: list()} #점수 차등 부여를 위한 딕셔너리 타입, 추후에 활용할 예정
+        self.Deadbooldic = {'Normal': list(),
+                            'Boss': list()} #점수 차등 부여를 위한 딕셔너리 타입, 추후에 활용할 예정
         self.curDeadbool = [] # 현재 카메라가 비추는 영역에서의 적의 사망 판정으 관리하는 리스트
         self.CameraPos = [0, 0] # 카메라 위치
-        self.CameraSlack = pygame.Rect(CAMERAXMARGIN, CAMERAYMARGIN, x_size - CAMERAXMARGIN * 2, MAP_GROUND - CAMERAYMARGIN)
         
         self.clearCounts = 0
         
         self.Enemylist = []
         self.Itemlist = []
         self.EnemyProjectileList = []
+        
+        self.PlayerStat = [750, 750, 1000, 0, 10]
+        self.EnemyStatdic = {'Seal': [2500, 2500, 80, 20, 4.5],
+                            'SnowMan': [2000, 2000, 0, 0, 3],
+                            'PolarBear': [4500, 4500, 180, 60, 3]}
+        
+    def GetMapSize(self, Type):
+        try:
+            if (Type == 'x'):
+                return self.map_x_size
+            elif (Type == 'y'):
+                return self.map_y_size
+            else:
+                raise ValueError
+        except ValueError:
+            print(Type, 'is not size attribute!!!')
+            
+    def GetMapLimit(self, Type):
+        try:
+            if (Type == 'left'):
+                return self.MAP_LIMIT_LEFT
+            elif (Type == 'right'):
+                return self.MAP_LIMIT_RIGHT
+            elif (Type == 'onground'):
+                return self.MAP_GROUND
+            else:
+                raise ValueError
+        except ValueError:
+            print(Type, 'is not attribute!!')
+        
     def GetPlayer(self):
         '''
         플레이어를 리턴시켜주는 메서드
         주로 플레이어의 정보를 필요로 하는 루프나 클래스에서 쓰임
         '''
         return self.PLAYER
+    
+    def GetCameraRange(self, pos):
+        try:
+            if (pos == 'x'):
+                return self.CAMERAXMARGIN
+            elif (pos == 'y'):
+                return self.CAMERAYMARGIN
+            else:
+                raise ValueError
+        except ValueError:
+            print (pos, 'is not Pos!!!')
     
     def GetCameraView(self, pos):
         '''
@@ -198,7 +138,7 @@ class GameStage(object):
             else:
                 raise ValueError
         except ValueError:
-            print('Not Pos!!!')
+            print(pos, 'is not Pos!!!')
             
     def GetEnemylist(self):
         return self.Enemylist
@@ -226,9 +166,9 @@ class GameStage(object):
         게임 오프닝을 보여주는 메서드
         '''
         while True:
-            Screen.fill(WHITE)
-            write(BigFont, 'Adventure', BLACK, XMARGIN, 200)
-            write(BigFont, 'Press S!', BLACK, XMARGIN, 350)
+            self.system.GetScreen().fill(self.system.GetColor('white'))
+            self.system.write(self.system.GetBigFont(), 'Adventure', self.system.GetColor('black'), XMARGIN, 200)
+            self.system.write(self.system.GetBigFont(), 'Press S!', self.system.GetColor('black'), XMARGIN, 350)
             pygame.display.update()
         
             for event in pygame.event.get():
@@ -248,29 +188,29 @@ class GameStage(object):
         게임 가이드를 보여주는 메서드
         '''
         while True:
-            Screen.fill(WHITE)
-            write(SmallFont, 'MANUAL', BLACK, XMARGIN, 30)
-            write(SmallFont, '<-, -> : LEFT, RIGHT MOVE', BLACK, XMARGIN, 80)
-            write(SmallFont, '^ : JUMP', BLACK, XMARGIN, 110)
-            write(SmallFont, 'x : ATTACK', BLACK, XMARGIN, 140)
-            write(SmallFont, 'z : GETITEM', BLACK, XMARGIN, 170)
-            write(SmallFont, 'ESC : GAME TERMINATE', BLACK, XMARGIN, 200)
+            self.system.GetScreen().fill(self.system.GetColor('white'))
+            self.system.write(self.system.GetSmallFont(), 'MANUAL', self.system.GetColor('black'), XMARGIN, 30)
+            self.system.write(self.system.GetSmallFont(), '<-, -> : LEFT, RIGHT MOVE', self.system.GetColor('black'), XMARGIN, 80)
+            self.system.write(self.system.GetSmallFont(), '^ : JUMP', self.system.GetColor('black'), XMARGIN, 110)
+            self.system.write(self.system.GetSmallFont(), 'x : ATTACK', self.system.GetColor('black'), XMARGIN, 140)
+            self.system.write(self.system.GetSmallFont(), 'z : GETITEM', self.system.GetColor('black'), XMARGIN, 170)
+            self.system.write(self.system.GetSmallFont(), 'ESC : GAME TERMINATE', self.system.GetColor('black'), XMARGIN, 200)
         
-            Screen.blit(ICEICON, (XMARGIN, 240))
-            write(SmallFont, ': REINFORCE ATK', BLACK, XMARGIN + 35, 240)
-            Screen.blit(ARMORICON, (XMARGIN, 270))
-            write(SmallFont, ': REINFORCE DEF', BLACK, XMARGIN + 35, 270)
-            Screen.blit(HASTEICON, (XMARGIN, 300))
-            write(SmallFont, ': REINFORCE SPEED', BLACK, XMARGIN + 35, 300)
-            Screen.blit(ATTACKSPEEDICON, (XMARGIN, 330))
-            write(SmallFont, ': REINFORCE ATTACKSPEED', BLACK, XMARGIN + 35, 330)
-            Screen.blit(HPRECOVERYICON, (XMARGIN, 360))
-            write(SmallFont, ': RECOVERY HP', BLACK, XMARGIN + 35, 360)
-            Screen.blit(MAXHPUPICON, (XMARGIN, 390))
-            write(SmallFont, ': IMPROVE MAXHP AND RECOVERY HP', BLACK, XMARGIN + 35, 390)
+            self.system.GetScreen().blit(ICEICON, (XMARGIN, 240))
+            self.system.write(self.system.GetSmallFont(), ': REINFORCE ATK', self.system.GetColor('black'), XMARGIN + 35, 240)
+            self.system.GetScreen().blit(ARMORICON, (XMARGIN, 270))
+            self.system.write(self.system.GetSmallFont(), ': REINFORCE DEF', self.system.GetColor('black'), XMARGIN + 35, 270)
+            self.system.GetScreen().blit(HASTEICON, (XMARGIN, 300))
+            self.system.write(self.system.GetSmallFont(), ': REINFORCE SPEED', self.system.GetColor('black'), XMARGIN + 35, 300)
+            self.system.GetScreen().blit(ATTACKSPEEDICON, (XMARGIN, 330))
+            self.system.write(self.system.GetSmallFont(), ': REINFORCE ATTACKSPEED', self.system.GetColor('black'), XMARGIN + 35, 330)
+            self.system.GetScreen().blit(HPRECOVERYICON, (XMARGIN, 360))
+            self.system.write(self.system.GetSmallFont(), ': RECOVERY HP', self.system.GetColor('black'), XMARGIN + 35, 360)
+            self.system.GetScreen().blit(MAXHPUPICON, (XMARGIN, 390))
+            self.system.write(self.system.GetSmallFont(), ': IMPROVE MAXHP AND RECOVERY HP', self.system.GetColor('black'), XMARGIN + 35, 390)
             
-            write(SmallFont, 'PRESS S!', BLACK, XMARGIN, 500)
-            pygame.draw.rect(Screen, BLACK, (0, 0, x_size, y_size), 5)
+            self.system.write(self.system.GetSmallFont(), 'PRESS S!', self.system.GetColor('black'), XMARGIN, 500)
+            pygame.draw.rect(self.system.GetScreen(), self.system.GetColor('black'), (0, 0, self.system.GetXSize(), self.system.GetYSize()), 5)
             pygame.display.update()
         
             for event in pygame.event.get():
@@ -283,9 +223,9 @@ class GameStage(object):
         스테이지 클리어시 나오는 화면
         '''
         self.clearCounts += 1
-        write(BigFont, 'Stage Clear!!!', BLACK, XMARGIN, 200)
+        self.system.write(self.system.GetBigFont(), 'Stage Clear!!!', self.system.GetColor('black'), XMARGIN, 200)
         if (len(self.mapImages) == self.clearCounts):
-            write(BigFont, 'Total Sclre: ' + str(self.totalScore + self.curScore), BLACK, XMARGIN, 270)
+            self.system.write(self.system.GetBigFont(), 'Total Sclre: ' + str(self.totalScore + self.curScore), self.system.GetColor('black'), XMARGIN, 270)
         pygame.display.update()
         pygame.time.wait(1000)
             
@@ -293,9 +233,9 @@ class GameStage(object):
         '''
         플레이어의 HP가 전부 소진되고 적이 전원 사망하지 않을 시 나오는 화면
         '''
-        write(BigFont, 'GameOver!!!', BLUE, XMARGIN, 200)
-        write(BigFont, 'Try Again?', BLUE, XMARGIN, 280)
-        write(BigFont, 'Y / N', BLUE, XMARGIN, 360)
+        self.system.write(self.system.GetBigFont(), 'GameOver!!!', self.system.GetColor('blue'), XMARGIN, 200)
+        self.system.write(self.system.GetBigFont(), 'Try Again?', self.system.GetColor('blue'), XMARGIN, 280)
+        self.system.write(self.system.GetBigFont(), 'Y / N', self.system.GetColor('blue'), XMARGIN, 360)
         pygame.display.update()
         pygame.time.wait(2000)
     
@@ -313,11 +253,11 @@ class GameStage(object):
                     
     def SetEnemy(self, EnemyList):
         for enemy in EnemyList:
-            if (enemy.GetName() == SEAL):
-                enemy.SetStat(*EnemyStatdic[SEAL])
-            elif (enemy.GetName() == SNOWMAN):
-                enemy.SetStat(*EnemyStatdic[SNOWMAN])
-            self.Deadboollist.append(enemy.GetCondition(DEAD))
+            if (enemy.GetName() == 'Seal'):
+                enemy.SetStat(*self.EnemyStatdic['Seal'])
+            elif (enemy.GetName() == 'SnowMan'):
+                enemy.SetStat(*self.EnemyStatdic['SnowMan'])
+            self.Deadboollist.append(enemy.GetCondition('dead'))
               
     def SetStage(self):
         '''
@@ -325,20 +265,20 @@ class GameStage(object):
         주로 main()함수에서 쓰임
         '''
         if (self.stage == 1):
-            self.PLAYER = PlayerObject.PlayerObject(100)
-            self.PLAYER.SetStat(*PlayerStat)
+            self.PLAYER = PlayerObject.PlayerObject(self.system, 100)
+            self.PLAYER.SetStat(*self.PlayerStat)
             
-            self.Enemylist.append(EnemyObject.EnemyObject(SNOWMAN, NORMAL, 800))
-            self.Enemylist.append(EnemyObject.EnemyObject(SEAL, NORMAL, 500))
-            self.Enemylist.append(EnemyObject.EnemyObject(SEAL, NORMAL, 1500))
-            self.Enemylist.append(EnemyObject.EnemyObject(SNOWMAN, NORMAL, 1800))
+            self.Enemylist.append(EnemyObject.EnemyObject('SnowMan', 'Normal', self.system, 800))
+            self.Enemylist.append(EnemyObject.EnemyObject('Seal', 'Normal', self.system, 500))
+            self.Enemylist.append(EnemyObject.EnemyObject('Seal', 'Normal', self.system, 1500))
+            self.Enemylist.append(EnemyObject.EnemyObject('SnowMan', 'Normal', self.system, 1800))
             self.SetEnemy(self.Enemylist)
                 
         elif (self.stage == 2):
-            self.PLAYER = PlayerObject.PlayerObject(100)
-            self.PLAYER.SetStat(*PlayerStat)
+            self.PLAYER = PlayerObject.PlayerObject(self.system, 100)
+            self.PLAYER.SetStat(*self.PlayerStat)
             
-            self.Enemylist.append(EnemyObject.EnemyObject(SEAL, NORMAL, 800))
+            self.Enemylist.append(EnemyObject.EnemyObject('Seal', 'Normal', self.system, 800))
             self.SetEnemy(self.Enemylist)
                 
     def ResetStage(self):
@@ -351,7 +291,7 @@ class GameStage(object):
         self.PLAYER.GetProjectiles().clear()
         self.EnemyProjectileList.clear()
         for enemy in self.Enemylist:
-            self.Deadboollist.append(enemy.GetCondition(DEAD))
+            self.Deadboollist.append(enemy.GetCondition('dead'))
         self.ClearStage = False
         self.GameOver = False
     
@@ -359,8 +299,8 @@ class GameStage(object):
         '''
         스테이지를 그려주는 메서드
         '''
-        Screen.blit(self.mapImages[self.stage - 1], (0, y_size - map_y_size), (self.CameraPos[0], self.CameraPos[1], map_x_size, map_y_size))
-        write(SmallFont, 'Scroe: ' + str(self.totalScore + self.curScore), BLACK, 650, 25)
+        self.system.GetScreen().blit(self.mapImages[self.stage - 1], (0, self.system.GetYSize() - self.map_y_size), (self.CameraPos[0], self.CameraPos[1], self.map_x_size, self.map_y_size))
+        self.system.write(self.system.GetSmallFont(), 'Scroe: ' + str(self.totalScore + self.curScore), self.system.GetColor('black'), 650, 25)
         
     def UpdateEnemy(self):
         '''
@@ -369,9 +309,9 @@ class GameStage(object):
         self.Deadboollist.clear()
         self.curDeadbool.clear()
         for enemy in self.Enemylist:
-            self.Deadboollist.append(enemy.GetCondition(DEAD))
-            if (enemy.GetPos(X) >= 0 and enemy.GetPos(X) + enemy.GetSize(WIDTH) <= x_size):
-                self.curDeadbool.append(enemy.GetCondition(DEAD))
+            self.Deadboollist.append(enemy.GetCondition('dead'))
+            if (enemy.GetPos('x') >= 0 and enemy.GetPos('x') + enemy.GetSize('width') <= self.system.GetXSize()):
+                self.curDeadbool.append(enemy.GetCondition('dead'))
                 
         if (all(self.Deadboollist)):
             self.ClearStage = True
@@ -410,42 +350,42 @@ class GameStage(object):
         '''
         카메라의 위치를 업데이트시켜주는 메서드
         '''
-        PlayerCenterX = self.PLAYER.GetPos(X) + self.PLAYER.GetSize(WIDTH) / 2
-        PlayerCenterY = self.PLAYER.GetPos(Y) + self.PLAYER.GetSize(HEIGHT) / 2
-        self.CameraDirection = self.PLAYER.GetCondition(DIRECTION)
+        PlayerCenterX = self.PLAYER.GetPos('x') + self.PLAYER.GetSize('width') / 2
+        PlayerCenterY = self.PLAYER.GetPos('y') + self.PLAYER.GetSize('height') / 2
+        self.CameraDirection = self.PLAYER.GetCondition('direction')
             
-        if (self.CameraPos[0] + x_size >= map_x_size):
-            self.CameraPos[0] = map_x_size - x_size
+        if (self.CameraPos[0] + self.system.GetXSize() >= self.map_x_size):
+            self.CameraPos[0] = self.map_x_size - self.system.GetXSize()
             self.XCameraMoveable = False
-        elif (PlayerCenterX <= CAMERAXMARGIN and self.CameraPos[0] <= 0):
+        elif (PlayerCenterX <= self.CAMERAXMARGIN and self.CameraPos[0] <= 0):
             self.CameraPos[0] = 0
             self.XCameraMoveable = False
             
         for enemy in self.Enemylist:
-            if (enemy.GetPos(X) <= x_size - enemy.GetSize(WIDTH) and enemy.GetPos(X) >= 0):
+            if (enemy.GetPos('x') <= self.system.GetXSize() - enemy.GetSize('width') and enemy.GetPos('x') >= 0):
                 if (not all(self.curDeadbool)):
                     self.isXCameraMove = False
                     self.XCameraMoveable = False
-                elif (all(self.curDeadbool) and (self.CameraPos[0] > 0 and self.CameraPos[0] < map_x_size - x_size)):
+                elif (all(self.curDeadbool) and (self.CameraPos[0] > 0 and self.CameraPos[0] < self.map_x_size - self.system.GetXSize())):
                     self.XCameraMoveable = True
-                if (PlayerCenterX > CAMERAXMARGIN and self.CameraDirection == RIGHT and self.XCameraMoveable):
+                if (PlayerCenterX > self.CAMERAXMARGIN and self.CameraDirection == 'right' and self.XCameraMoveable):
                     self.forceXMove = True
                 else:
                     self.forceXMove = False
-        if (self.PLAYER.GetCondition(WALK)):
+        if (self.PLAYER.GetCondition('walk')):
             self.isXCameraMove = True
         else:
             self.isXCameraMove = False
         
         if (not self.XCameraMoveable):
-            if (self.CameraPos[0] >= map_x_size - x_size):
-                if (PlayerCenterX < CAMERAXMARGIN):
+            if (self.CameraPos[0] >= self.map_x_size - self.system.GetXSize()):
+                if (PlayerCenterX < self.CAMERAXMARGIN):
                     self.XCameraMoveable = True
             elif (self.CameraPos[0] <= 0):
-                if (PlayerCenterX > CAMERAXMARGIN):
+                if (PlayerCenterX > self.CAMERAXMARGIN):
                     self.XCameraMoveable = True
                     
-        if (self.PLAYER.GetCondition(ONGROUND)):
+        if (self.PLAYER.GetCondition('onground')):
             self.CameraPos[1] = 0
             
     def removeProjectile(self):
@@ -455,12 +395,12 @@ class GameStage(object):
         PlayerProjectile = self.PLAYER.GetProjectiles()
         
         for projectile in PlayerProjectile:
-            if (projectile.GetPos(X) <= MAP_LIMIT_LEFT or projectile.GetPos(X) + projectile.GetSize(WIDTH) >= MAP_LIMIT_RIGHT):
+            if (projectile.GetPos('x') <= self.MAP_LIMIT_LEFT or projectile.GetPos('x') + projectile.GetSize('width') >= self.MAP_LIMIT_RIGHT):
                 PlayerProjectile.remove(projectile)
                 
         for projectile in self.EnemyProjectileList:
-            if ((projectile.GetPos(X) <= MAP_LIMIT_LEFT or projectile.GetPos(X) + projectile.GetSize(WIDTH) >= MAP_LIMIT_RIGHT) or
-                abs(projectile.GetPos(X) - projectile.GetInitPos(X)) > SNOWBALLRANGE):
+            if ((projectile.GetPos('x') <= self.MAP_LIMIT_LEFT or projectile.GetPos('x') + projectile.GetSize('width') >= self.MAP_LIMIT_RIGHT) or
+                abs(projectile.GetPos('x') - projectile.GetInitPos('x')) > SNOWBALLRANGE):
                 self.EnemyProjectileList.remove(projectile)
                     
     def UpdateStage(self):

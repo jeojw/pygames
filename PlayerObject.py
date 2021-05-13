@@ -1,20 +1,10 @@
-import main
 import LifeObject
 import Projectile
+import GameSystem
 import pygame
 
 pygame.init() # pygame 초기화
 
-'''
-맵 관련 변수
-'''
-MAP_GROUND = 465
-MAP_HEIGHT = 0
-MAP_LIMIT_LEFT = 0
-MAP_LIMIT_RIGHT = 800
-
-CAMERAXMARGIN = 250
-CAMERAYMARGIN = 200
 
 JUMPDISTANCE = 80
 AIRSPACE = -10
@@ -26,40 +16,8 @@ AMMUNITION = 30
 오브젝트 관련 변수
 '''
 PLAYERATKCOOL = 1
-PLYAERRANGE = 300
-POLARBEARATTACKRANGE = 0
+PLAYAERRANGE = 300
 
-'''
-오브젝트의 스텟 관련 변수
-'''
-MAXHP = 'maxhp'
-HP = 'hp'
-ATK = 'atk'
-DEF = 'def'
-SPEED = 'speed'
-
-'''
-오브젝트의 컨디션 관련 전역변수
-'''
-LEFT = 'left'
-RIGHT = 'right'
-DIRECTION = 'direction'
-STATIC = 'static'
-WALK = 'walk'
-ATTACK = 'attack'
-GETATTACK = 'getattack'
-DEAD = 'dead'
-HITBOX = 'hitbox'
-ATKHITBOX = 'atkhitbox'
-ONGROUND = 'onground'
-
-'''
-히트박스 사이즈 및 위치 전역변수
-'''
-X = 'x'
-Y = 'y'
-WIDTH = 'width'
-HEIGHT = 'height'
 
 '''
 아이템 아이콘, 이펙트 관련 변수
@@ -75,8 +33,6 @@ COIN = 'items/coin.png'
 BASIC = 'char_sprite/bubble.png'
 REINFORCE = 'char_sprite/ice.png'
 
-SNOWBALL = 'enemy_sprite/SnowMan_sprite/snowball.png'
-
 ICEICON = pygame.image.load(ICE)
 ARMORICON = pygame.image.load(ARMOR)
 HASTEICON = pygame.image.load(HASTE)
@@ -90,58 +46,17 @@ COINICON = pygame.image.load(COIN)
 '''
 PlayerStat = [750, 750, 1000, 0, 10]
 
-'''
-아이템 획득 시 스텟 변환 리스트
-'''
-ICEStat = [0, 0, 100, 0, 0, 1]
-ARMORStat = [0, 0, 0, 20, 0, 1]
-HASTEStat = [0, 0, 0, 0, 5, 1]
-ATTACKSPEEDStat = [0, 0, 0, 0, 0, 1.5]
-MAXHPUPStat = [250, 0, 0, 0, 0, 1]
-
-'''
-텍스트 작성 함수
-'''
-Font = pygame.font.SysFont('굴림', 40)
-
-def write(Font, Text, color, x_pos, y_pos):
-    surface = Font.render(Text, True, color)
-    rect = surface.get_rect()
-    Screen.blit(surface, (x_pos, y_pos))
-
-'''
-기본적인 색상
-'''
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-BLUE = (0, 0, 255)
-GREEN = (0, 255, 0)
-RED = (255, 0, 0)
-VIRGINRED = (204, 0, 0)
-
-'''
-기본적인 시스템 변수 설정
-'''
 x_size = 800
-y_size = 600
-
-map_x_size = 2400
-map_y_size = 1000
-
-Clock = pygame.time.Clock()
-Screen = pygame.display.set_mode((x_size, y_size))
-BigFont = pygame.font.SysFont('notosanscjkkrblack', 70)
-SmallFont = pygame.font.SysFont('notosanscjkkrblack', 40)
 
 class PlayerObject(LifeObject.LifeObject):
-    def __init__(self, x_pos, y_pos=None):
+    def __init__(self, System, x_pos, y_pos=None):
         '''
         플레이어의 기본적인 정보를 설정하는 생성자
         여기에서 스프라이트 및 쿨타임 등을 관리함
         '''
-        super().__init__(x_pos, y_pos)
+        super().__init__(System, x_pos, y_pos)
         
-        self.direction = RIGHT
+        self.direction = 'right'
         self.getitem = False
         self.itemcounts = 0 #누적으로 획득한 아이템 개수
         self.coincounts = 0 #코인 개수
@@ -194,7 +109,7 @@ class PlayerObject(LifeObject.LifeObject):
             else:
                 raise ValueError
         except ValueError:
-            print('Not Pos!!!!')
+            print(pos, 'is not Pos!!!!')
         
     def GetSize(self, length):
         '''
@@ -208,7 +123,7 @@ class PlayerObject(LifeObject.LifeObject):
             else:
                 raise ValueError
         except ValueError:
-            print('Not Lenght!!!')
+            print(length, 'is not Lenght!!!')
                 
     def attack(self):
         '''
@@ -220,10 +135,10 @@ class PlayerObject(LifeObject.LifeObject):
         if (self.itemType == ICE and self.coolElapsed == 0):
             self.ammunition -= 1
         if (self.isDead is False and self.isGetattack is False and self.coolElapsed == 0):
-            if (self.direction == LEFT):
-                self.projectilelist.append(Projectile.Projectile(self.projectileimage, self.hitbox.left, self.hitbox.y, self.ATK, LEFT))
+            if (self.direction == 'left'):
+                self.projectilelist.append(Projectile.Projectile(self.projectileimage, self.hitbox.left, self.hitbox.y, self.ATK, 'left'))
             else:
-                self.projectilelist.append(Projectile.Projectile(self.projectileimage, self.hitbox.right, self.hitbox.y, self.ATK, RIGHT))
+                self.projectilelist.append(Projectile.Projectile(self.projectileimage, self.hitbox.right, self.hitbox.y, self.ATK, 'right'))
                  
     def getItem(self, Stage):
         '''
@@ -239,31 +154,31 @@ class PlayerObject(LifeObject.LifeObject):
                     if (item.GetImage() == ICE):
                         self.itemType = ICE
                         self.ResetCondition()
-                        self.ChangeStat(*ICEStat)
+                        self.ChangeStat(*item.GetStat(ICE))
                         self.projectileimage = REINFORCE
                         self.getitem = False
                     elif (item.GetImage() == ARMOR):
                         self.itemType = ARMOR
                         self.ResetCondition()
-                        self.ChangeStat(*ARMORStat)
+                        self.ChangeStat(*item.GetStat(ARMOR))
                         self.itemStart = pygame.time.get_ticks()
                         self.getitem = False
                     elif (item.GetImage() == HASTE):
                         self.itemType = HASTE
                         self.ResetCondition()
-                        self.ChangeStat(*HASTEStat)
+                        self.ChangeStat(*item.GetStat(HASTE))
                         self.itemStart = pygame.time.get_ticks()
                         self.getitem = False
                     elif (item.GetImage() == ATTACKSPEED):
                         self.itemType = ATTACKSPEED
                         self.ResetCondition()
-                        self.ChangeStat(*ATTACKSPEEDStat)
+                        self.ChangeStat(*item.GetStat(ATTACKSPEED))
                         self.itemStart = pygame.time.get_ticks()
                         self.getitem = False
                     elif (item.GetImage() == MAXHPUP):
                         self.itemType = MAXHPUP
                         self.ResetCondition()
-                        self.ChangeStat(*MAXHPUPStat)
+                        self.ChangeStat(*item.GetStat(MAXHPUP))
                         self.HP = self.MAXHP
                         self.itemStart = pygame.time.get_ticks()
                         self.getitem = False
@@ -295,22 +210,22 @@ class PlayerObject(LifeObject.LifeObject):
         '''
         Length = 200
         convertCoefficient = Length / self.MAXHP
-        pygame.draw.rect(Screen, VIRGINRED, (10, 10, Length, 30), 2)
+        pygame.draw.rect(self.system.GetScreen(), self.system.GetColor('virginred'), (10, 10, Length, 30), 2)
         if (self.HP >= 0):
-            pygame.draw.rect(Screen, RED, (10, 10, self.HP * convertCoefficient , 30))
+            pygame.draw.rect(self.system.GetScreen(), self.system.GetColor('red'), (10, 10, self.HP * convertCoefficient , 30))
             
         if (self.itemType == ICE):
-            Screen.blit(ICEICON, (Length + 20, 15))
-            write(SmallFont, ' X ' + str(self.ammunition), BLACK, Length + 40, 15)
+            self.system.GetScreen().blit(ICEICON, (Length + 20, 15))
+            self.system.write(self.system.GetSmallFont(), ' X ' + str(self.ammunition), self.system.GetColor('black'), Length + 40, 15)
         elif (self.itemType == ARMOR):
-            Screen.blit(ARMORICON, (Length + 20, 15))
-            write(SmallFont, ' : ' + str(self.duration - self.itemElapsed) + ' sec ', BLACK, Length + 40, 15)
+            self.system.GetScreen().blit(ARMORICON, (Length + 20, 15))
+            self.system.write(self.system.GetSmallFont(), ' : ' + str(self.duration - self.itemElapsed) + ' sec ', self.system.GetColor('black'), Length + 40, 15)
         elif (self.itemType == HASTE):
-            Screen.blit(HASTEICON, (Length + 20, 15))
-            write(SmallFont, ' : ' + str(self.duration - self.itemElapsed) + ' sec ', BLACK, Length + 40, 15)
+            self.system.GetScreen().blit(HASTEICON, (Length + 20, 15))
+            self.system.write(self.system.GetSmallFont(), ' : ' + str(self.duration - self.itemElapsed) + ' sec ', self.system.GetColor('black'), Length + 40, 15)
         elif (self.itemType == ATTACKSPEED):
-            Screen.blit(ATTACKSPEEDICON, (Length + 20, 15))
-            write(SmallFont, ' : ' + str(self.duration - self.itemElapsed) + ' sec ', BLACK, Length + 40, 15)
+            self.system.GetScreen().blit(ATTACKSPEEDICON, (Length + 20, 15))
+            self.system.write(self.system.GetSmallFont(), ' : ' + str(self.duration - self.itemElapsed) + ' sec ', self.system.GetColor('black'), Length + 40, 15)
             
     def updateCondition(self, Stage):
         '''
@@ -322,7 +237,7 @@ class PlayerObject(LifeObject.LifeObject):
         super().updateCondition()
         for enemy in Stage.GetEnemylist():
             if (self.isHitbox):
-                if (self.checkcollision(enemy) and enemy.GetCondition(ATKHITBOX)):
+                if (self.checkcollision(enemy) and enemy.GetCondition('atkhitbox')):
                     self.getattack(enemy)
                     
         for projectile in Stage.GetEnemyProjectiles():
@@ -348,7 +263,7 @@ class PlayerObject(LifeObject.LifeObject):
                 self.itemElapsed = int((pygame.time.get_ticks() - self.itemStart) / 1000)
                 if (self.itemElapsed > DURATION):
                     self.ItemReset()
-            elif (self.itemType == MAXHP):
+            elif (self.itemType == MAXHPUP):
                 self.itemElapsed = int((pygame.time.get_ticks() - self.itemStart) / 1000)
                 if (self.itemElapsed > DURATION):
                     self.ItemReset()
@@ -363,40 +278,40 @@ class PlayerObject(LifeObject.LifeObject):
         self.hitbox.x = self.x_pos
         self.hitbox.bottom = self.y_pos
 
-        if (Stage.GetCameraView(X) <= map_x_size - x_size or Stage.GetCameraView(X) >= 0):
-            if (self.hitbox.centerx > CAMERAXMARGIN and self.direction == RIGHT):
+        if (Stage.GetCameraView('x') <= Stage.map_x_size - x_size or Stage.GetCameraView('x') >= 0): ## check
+            if (self.hitbox.centerx > Stage.GetCameraRange('x') and self.direction == 'right'):
                 if (Stage.XCameraMoveable):
                     Stage.CameraXMovement(self.SPEED)
                     self.x_pos -= self.SPEED
-            elif (self.hitbox.centerx <= CAMERAXMARGIN and Stage.GetCameraView(X) > 0 and self.direction == LEFT):
+            elif (self.hitbox.centerx <= Stage.GetCameraRange('x') and Stage.GetCameraView('x') > 0 and self.direction == 'left'): ## check
                 if (Stage.XCameraMoveable):
                     Stage.CameraXMovement(-self.SPEED)
                     self.x_pos += self.SPEED
                 
         if (Stage.XCameraMoveable is False):
-            if (self.hitbox.left <= MAP_LIMIT_LEFT):
-                self.x_pos = MAP_LIMIT_LEFT
-            if (self.hitbox.right >= MAP_LIMIT_RIGHT):
-                self.x_pos = MAP_LIMIT_RIGHT - self.hitbox.width
+            if (self.hitbox.left <= Stage.GetMapLimit('left')):
+                self.x_pos = Stage.GetMapLimit('left')
+            if (self.hitbox.right >= Stage.GetMapLimit('right')):
+                self.x_pos = Stage.GetMapLimit('right') - self.hitbox.width
                 
         if (self.isOnGround is False):
             self.y_pos += self.airSpace
             Stage.CameraYMovement(self.airSpace)
-            if (self.y_pos <= MAP_GROUND - JUMPDISTANCE):
+            if (self.y_pos <= Stage.GetMapLimit('onground') - JUMPDISTANCE):
                 self.airSpace = 0
                 self.gravity = GRAVITY
             self.y_pos += self.gravity
             Stage.CameraYMovement(self.gravity)
-        if (self.y_pos >= MAP_GROUND):
-            self.y_pos = MAP_GROUND
+        if (self.y_pos >= Stage.GetMapLimit('onground')):
+            self.y_pos = Stage.GetMapLimit('onground')
             self.isOnGround = True
             self.gravity = 0
             self.airSpace = AIRSPACE
                 
         if (self.isWalk and self.isAttack is False):
-            if (self.direction == LEFT):
+            if (self.direction == 'left'):
                 self.x_pos += -self.SPEED
-            elif (self.direction == RIGHT):
+            elif (self.direction == 'right'):
                 self.x_pos += self.SPEED
                 
     def update(self, dt, Stage):
