@@ -3,8 +3,6 @@ import sys
 import GameStage
 import GameSystem
 
-pygame.init() # pygame 초기화
-
 '''
 맵 관련 변수
 '''
@@ -79,7 +77,7 @@ def rungame(System, Stage):
             Stage.ClearScreen()
             return False
 
-        System.write(System.GetSmallFont(), str(Stage.XCameraMoveable) + '   ' + str(Stage.GetPlayer().Condition), System.GetColor('black'), 350, 20)
+        System.write(System.GetSmallFont(), str(Stage.GetEnemylist()[0].delayElapsed) + '   ' + str(Stage.GetPlayer().Condition), System.GetColor('black'), 350, 20)
         pygame.display.update()
         System.GetClock().tick(System.GetFPS())
         

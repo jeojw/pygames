@@ -1,11 +1,8 @@
-import main
 import PlayerObject
-import EnemyObject
+import Seal
+import SnowMan
 import sys
 import pygame
-import GameSystem
-
-pygame.init() # pygame 초기화
 
 '''
 맵 관련 변수
@@ -268,17 +265,17 @@ class GameStage(object):
             self.PLAYER = PlayerObject.PlayerObject(self.system, 100)
             self.PLAYER.SetStat(*self.PlayerStat)
             
-            self.Enemylist.append(EnemyObject.EnemyObject('SnowMan', 'Normal', self.system, 800))
-            self.Enemylist.append(EnemyObject.EnemyObject('Seal', 'Normal', self.system, 500))
-            self.Enemylist.append(EnemyObject.EnemyObject('Seal', 'Normal', self.system, 1500))
-            self.Enemylist.append(EnemyObject.EnemyObject('SnowMan', 'Normal', self.system, 1800))
+            self.Enemylist.append(SnowMan.SnowMan('Normal', self.system, 800))
+            self.Enemylist.append(Seal.Seal('Normal', self.system, 500))
+            self.Enemylist.append(Seal.Seal('Normal', self.system, 1500))
+            self.Enemylist.append(SnowMan.SnowMan('Normal', self.system, 1800))
             self.SetEnemy(self.Enemylist)
                 
         elif (self.stage == 2):
             self.PLAYER = PlayerObject.PlayerObject(self.system, 100)
             self.PLAYER.SetStat(*self.PlayerStat)
             
-            self.Enemylist.append(EnemyObject.EnemyObject('Seal', 'Normal', self.system, 800))
+            self.Enemylist.append(Seal.Seal('Normal', self.system, 800))
             self.SetEnemy(self.Enemylist)
                 
     def ResetStage(self):

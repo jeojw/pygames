@@ -1,10 +1,6 @@
 import LifeObject
 import Projectile
-import GameSystem
 import pygame
-
-pygame.init() # pygame 초기화
-
 
 JUMPDISTANCE = 80
 AIRSPACE = -10

@@ -1,9 +1,4 @@
-import main
-import GameSystem
-import GameStage
 import pygame
-
-pygame.init() # pygame 초기화
 
 class Projectile(object):
     '''

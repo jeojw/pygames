@@ -1,7 +1,4 @@
-import GameSystem
 import pygame
-
-pygame.init() # pygame 초기화
 
 class LifeObject(object):
     '''

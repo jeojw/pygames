@@ -1,6 +1,4 @@
-import GameSystem
 import pygame
-
 
 '''
 차후 변수 관련해서 반드시 수정할 것!!
