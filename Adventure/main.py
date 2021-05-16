@@ -77,7 +77,7 @@ def rungame(System, Stage):
             Stage.ClearScreen()
             return False
 
-        System.write(System.GetSmallFont(), str(Stage.GetEnemylist()[0].delayElapsed) + '   ' + str(Stage.GetPlayer().Condition), System.GetColor('black'), 350, 20)
+        System.write(System.GetSmallFont(), str(Stage.GetEnemylist()[0].coolStart) + '   ' + str(Stage.GetEnemylist()[1].coolStart), System.GetColor('black'), 350, 20)
         pygame.display.update()
         System.GetClock().tick(System.GetFPS())
         

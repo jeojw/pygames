@@ -14,20 +14,19 @@ AMMUNITION = 30
 PLAYERATKCOOL = 1
 PLAYAERRANGE = 300
 
-
 '''
 아이템 아이콘, 이펙트 관련 변수
 '''
-ICE = 'char_sprite/ice.png'
-ARMOR = 'items/shield.png'
-HASTE = 'items/haste.png'
-ATTACKSPEED = 'items/attackspeed.png'
-HPRECOVERY = 'items/hprecovery.png'
-MAXHPUP = 'items/hpmaxup.png'
-COIN = 'items/coin.png'
+ICE = 'Adventure/char_sprite/ice.png'
+ARMOR = 'Adventure/items/shield.png'
+HASTE = 'Adventure/items/haste.png'
+ATTACKSPEED = 'Adventure/items/attackspeed.png'
+HPRECOVERY = 'Adventure/items/hprecovery.png'
+MAXHPUP = 'Adventure/items/hpmaxup.png'
+COIN = 'Adventure/items/coin.png'
 
-BASIC = 'char_sprite/bubble.png'
-REINFORCE = 'char_sprite/ice.png'
+BASIC = 'Adventure/char_sprite/bubble.png'
+REINFORCE = 'Adventure/char_sprite/ice.png'
 
 ICEICON = pygame.image.load(ICE)
 ARMORICON = pygame.image.load(ARMOR)
@@ -64,11 +63,11 @@ class PlayerObject(LifeObject.LifeObject):
         self.itemElapsed = 0 # 아이템 획득 후 경과시간
         self.atkcool = PLAYERATKCOOL
         
-        static = [pygame.image.load('char_sprite/char_static.png')]
-        dead = [pygame.image.load('char_sprite/char_dead.png')]
-        walk = [pygame.image.load('char_sprite/char_walk_' + str(i) + '.png') for i in range(1, 4)]
-        attack = [pygame.image.load('char_sprite/char_attack.png')]
-        getattack = [pygame.image.load('char_sprite/char_get_attack.png')]
+        static = [pygame.image.load('Adventure/char_sprite/char_static.png')]
+        dead = [pygame.image.load('Adventure/char_sprite/char_dead.png')]
+        walk = [pygame.image.load('Adventure/char_sprite/char_walk_' + str(i) + '.png') for i in range(1, 4)]
+        attack = [pygame.image.load('Adventure/char_sprite/char_attack.png')]
+        getattack = [pygame.image.load('Adventure/char_sprite/char_get_attack.png')]
 
         self.spritelist = [static, walk, attack, getattack ,dead]
         self.cursprite = self.spritelist[self.cur][self.index]
@@ -309,6 +308,40 @@ class PlayerObject(LifeObject.LifeObject):
                 self.x_pos += -self.SPEED
             elif (self.direction == 'right'):
                 self.x_pos += self.SPEED
+                
+    def updateSprite(self, dt):# 추후 아이템 획득시에도 스프라이트 관련 업데이트를 추가할 것
+        '''
+        적의 스프라이트를 업데이트 시켜주는 함수
+        스프라이트 업데이트 지연까지 추가함
+        '''  
+        self.current_time += dt
+        
+        if (self.Condition == 'static'):
+            self.cur = 0
+            self.updateCycle()
+        if (self.Condition == 'walk'):
+            self.cur = 1
+            self.updateCycle()
+        if (self.Condition == 'attack'):
+            self.cur = 2
+            self.updateCycle()
+        if (self.Condition == 'getattack'):
+            self.cur = 3
+            self.updateCycle()
+            self.isGetattack = False
+        if (self.Condition == 'dead'):
+            self.cur = 4
+            self.isChangeCondition = False
+        
+        if (self.current_time >= self.animation_time or self.isChangeCondition):
+            self.current_time = 0
+            
+            self.index += 1
+            if (self.index >= len(self.spritelist[self.cur]) or self.isChangeCondition):
+                self.index = 0
+        
+        self.cursprite = self.spritelist[self.cur][self.index]
+        self.hitbox = self.cursprite.get_rect(bottomleft=(self.x_pos, self.y_pos))
                 
     def update(self, dt, Stage):
         '''

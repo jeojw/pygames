@@ -236,13 +236,14 @@ class LifeObject(object):
         else:
             self.isChangeCondition = False
         
-        if (self.isGetattack is False and self.isDead is False and self.coolElapsed == 0):
-            self.isWalk = False
-            self.isAttack = True
-            self.attackHitbox = True
-            self.coolStart = pygame.time.get_ticks()
-        else:
-            self.isAttack = False
+        if (self.isGetattack is False and self.isDead is False):
+            if (self.coolElapsed == 0):
+                self.isWalk = False
+                self.isAttack = True
+                self.attackHitbox = True
+                self.coolStart = pygame.time.get_ticks()
+            else:
+                self.isAttack = False
             
     def getattack(self, Another):
         '''
@@ -372,34 +373,7 @@ class LifeObject(object):
         적의 스프라이트를 업데이트 시켜주는 함수
         스프라이트 업데이트 지연까지 추가함
         '''  
-        self.current_time += dt
-        
-        if (self.Condition == 'static'):
-            self.cur = 0
-            self.updateCycle()
-        if (self.Condition == 'walk'):
-            self.cur = 1
-            self.updateCycle()
-        if (self.Condition == 'attack'):
-            self.cur = 2
-            self.updateCycle()
-        if (self.Condition == 'getattack'):
-            self.cur = 3
-            self.updateCycle()
-            self.isGetattack = False
-        if (self.Condition == 'dead'):
-            self.cur = 4
-            self.isChangeCondition = False
-        
-        if (self.current_time >= self.animation_time or self.isChangeCondition):
-            self.current_time = 0
-            
-            self.index += 1
-            if (self.index >= len(self.spritelist[self.cur]) or self.isChangeCondition):
-                self.index = 0
-        
-        self.cursprite = self.spritelist[self.cur][self.index]
-        self.hitbox = self.cursprite.get_rect(bottomleft=(self.x_pos, self.y_pos))
+        pass
         
     def update(self, dt, Stage):
         '''

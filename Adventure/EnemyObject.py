@@ -11,17 +11,17 @@ ENEMYATKCOOL = 1
 '''
 아이템 아이콘, 이펙트 관련 변수
 '''
-ICE = 'char_sprite/ice.png'
-ARMOR = 'items/shield.png'
-HASTE = 'items/haste.png'
-ATTACKSPEED = 'items/attackspeed.png'
-HPRECOVERY = 'items/hprecovery.png'
-MAXHPUP = 'items/hpmaxup.png'
-COIN = 'items/coin.png'
+ICE = 'Adventure/char_sprite/ice.png'
+ARMOR = 'Adventure/items/shield.png'
+HASTE = 'Adventure/items/haste.png'
+ATTACKSPEED = 'Adventure/items/attackspeed.png'
+HPRECOVERY = 'Adventure/items/hprecovery.png'
+MAXHPUP = 'Adventure/items/hpmaxup.png'
+COIN = 'Adventure/items/coin.png'
 
 ItemTypes = [ICE, ARMOR, HASTE, ATTACKSPEED, HPRECOVERY, MAXHPUP] # 아이템 타입, 주로 스프라이트 파일로 통해 아이템 획득을 구분할 예정
 
-DETECTICON = pygame.image.load('effect_icon/detectIcon.png')
+DETECTICON = pygame.image.load('Adventure/effect_icon/detectIcon.png')
 
 '''
 적 타입 및 이름을 나타내는 변수
@@ -43,11 +43,11 @@ class EnemyObject(LifeObject.LifeObject):
         self.isDetect = False # 플레이어 발견 관련 불값
         self.atkcool = ENEMYATKCOOL
         
-        static = [pygame.image.load('enemy_sprite/Seal_sprite/seal_static.png')]
-        dead = [pygame.image.load('enemy_sprite/Seal_sprite/seal_dead.png')]
-        walk = [pygame.image.load('enemy_sprite/Seal_sprite/seal_walk_' + str(i) + '.png') for i in range(1, 3)]
-        attack = [pygame.image.load('enemy_sprite/Seal_sprite/seal_attack_' + str(i) + '.png') for i in range(1, 3)]
-        getattack = [pygame.image.load('enemy_sprite/Seal_sprite/seal_get_attack.png')]
+        static = [pygame.image.load('Adventure/enemy_sprite/Seal_sprite/seal_static.png')]
+        dead = [pygame.image.load('Adventure/enemy_sprite/Seal_sprite/seal_dead.png')]
+        walk = [pygame.image.load('Adventure/enemy_sprite/Seal_sprite/seal_walk_' + str(i) + '.png') for i in range(1, 3)]
+        attack = [pygame.image.load('Adventure/enemy_sprite/Seal_sprite/seal_attack_' + str(i) + '.png') for i in range(1, 3)]
+        getattack = [pygame.image.load('Adventure/enemy_sprite/Seal_sprite/seal_get_attack.png')]
         
         self.spritelist = [static, walk, attack, getattack, dead]
         self.cursprite = self.spritelist[self.cur][self.index]
@@ -89,7 +89,22 @@ class EnemyObject(LifeObject.LifeObject):
     def GetType(self):
         return self.Type
     
-
+    def attack(self):
+        '''
+        오브젝트의 공격 상태를 설정하는 메서드
+        공격 함수 호출 시 쿨타임이 돌아가도록 설정함
+        '''
+        if (self.Condition != 'attack'):
+            self.isChangeCondition = True
+            self.delayStart = pygame.time.get_ticks()
+        else:
+            self.isChangeCondition = False
+        
+        if (self.isGetattack is False and self.isDead is False):
+            self.isWalk = False
+            self.isAttack = True
+            self.attackHitbox = True
+            
     def dropItem(self, Stage):
         '''
         아이템을 드롭시키는 함수, 나중에 확률에 따라 드랍시킬 생각
@@ -185,8 +200,34 @@ class EnemyObject(LifeObject.LifeObject):
         '''
         적의 스프라이트를 업데이트 시켜주는 함수
         스프라이트 업데이트 지연까지 추가함
-        '''
-        super().updateSprite(dt)
+        '''  
+        self.current_time += dt
+        
+        if (self.Condition == 'static'):
+            self.cur = 0
+            self.updateCycle()
+        if (self.Condition == 'walk'):
+            self.cur = 1
+            self.updateCycle()
+        if (self.Condition == 'attack'):
+            self.cur = 2
+            self.updateCycle()
+        if (self.Condition == 'getattack'):
+            self.cur = 3
+            self.updateCycle()
+            self.isGetattack = False
+        if (self.Condition == 'dead'):
+            self.cur = 4
+            self.isChangeCondition = False
+        
+        if (self.current_time >= self.animation_time or self.isChangeCondition):
+            self.current_time = 0
+            
+            self.index += 1
+            if (self.index >= len(self.spritelist[self.cur]) or self.isChangeCondition):
+                self.index = 0
+        
+        self.cursprite = self.spritelist[self.cur][self.index]
         if (self.direction == 'left'):
             self.hitbox = self.cursprite.get_rect(bottomright=(self.x_pos + 70, self.y_pos)) #방향전환시 좌표오류를 잡아줌
         else:

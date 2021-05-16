@@ -17,17 +17,17 @@ SNOWBALLRANGE = 300
 '''
 아이템 아이콘, 이펙트 관련 변수
 '''
-ICEICON = pygame.image.load('char_sprite/ice.png')
-ARMORICON = pygame.image.load('items/shield.png')
-HASTEICON = pygame.image.load('items/haste.png')
-ATTACKSPEEDICON = pygame.image.load('items/attackspeed.png')
-HPRECOVERYICON = pygame.image.load('items/hprecovery.png')
-MAXHPUPICON = pygame.image.load('items/hpmaxup.png')
-COINICON = pygame.image.load('items/coin.png')
+ICEICON = pygame.image.load('Adventure/char_sprite/ice.png')
+ARMORICON = pygame.image.load('Adventure/items/shield.png')
+HASTEICON = pygame.image.load('Adventure/items/haste.png')
+ATTACKSPEEDICON = pygame.image.load('Adventure/items/attackspeed.png')
+HPRECOVERYICON = pygame.image.load('Adventure/items/hprecovery.png')
+MAXHPUPICON = pygame.image.load('Adventure/items/hpmaxup.png')
+COINICON = pygame.image.load('Adventure/items/coin.png')
 
 # make enemylist!!!
-stage_1_map = pygame.image.load('map_images/stage_1_map.png')
-stage_2_map = pygame.image.load('map_images/stage_2_map.png')
+stage_1_map = pygame.image.load('Adventure/map_images/stage_1_map.png')
+stage_2_map = pygame.image.load('Adventure/map_images/stage_2_map.png')
 maplist = [stage_1_map, stage_2_map]
 
 class GameStage(object):
@@ -77,7 +77,7 @@ class GameStage(object):
         self.EnemyProjectileList = []
         
         self.PlayerStat = [750, 750, 1000, 0, 10]
-        self.EnemyStatdic = {'Seal': [2500, 2500, 80, 20, 4.5],
+        self.EnemyStatdic = {'Seal': [2500, 2500, 0, 20, 4.5],
                             'SnowMan': [2000, 2000, 0, 0, 3],
                             'PolarBear': [4500, 4500, 180, 60, 3]}
         

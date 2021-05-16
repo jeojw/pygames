@@ -1,21 +1,20 @@
 import pygame
 import EnemyObject
-import Projectile
 
 COIN = 'items/coin.png'
 
-class SnowMan(EnemyObject.EnemyObject):
+class Seal(EnemyObject.EnemyObject):
     def __init__(self, System, x_pos, y_pos):
         super().__init__(System, x_pos, y_pos)
         
-        self.Name = 'SnowMan'
-        self.projectileimage = 'enemy_sprite/SnowMan_sprite/snowball.png'
-        self.attackDistance = 200
-        static = [pygame.image.load('enemy_sprite/SnowMan_sprite/snowman_static.png')]
-        dead = [pygame.image.load('enemy_sprite/SnowMan_sprite/snowman_dead.png')]
-        walk = [pygame.image.load('enemy_sprite/SnowMan_sprite/snowman_walk_' + str(i) + '.png') for i in range(1, 3)]
-        attack = [pygame.image.load('enemy_sprite/Seal_sprite/seal_attack_' + str(i) + '.png') for i in range(1, 3)]
-        getattack = [pygame.image.load('enemy_sprite/SnowMan_sprite/snowman_get_attack.png')]
+        self.Name = 'Seal'
+        self.Attackable = True
+        self.attackRange = 75 # 공격 범위
+        static = [pygame.image.load('Adventure/enemy_sprite/Seal_sprite/seal_static.png')]
+        dead = [pygame.image.load('Adventure/enemy_sprite/Seal_sprite/seal_dead.png')]
+        walk = [pygame.image.load('Adventure/enemy_sprite/Seal_sprite/seal_walk_' + str(i) + '.png') for i in range(1, 3)]
+        attack = [pygame.image.load('Adventure/enemy_sprite/Seal_sprite/seal_attack_' + str(i) + '.png') for i in range(1, 3)]
+        getattack = [pygame.image.load('Adventure/enemy_sprite/Seal_sprite/seal_get_attack.png')]
         
         self.spritelist = [static, walk, attack, getattack, dead]
         self.cursprite = self.spritelist[self.cur][self.index]
@@ -25,13 +24,28 @@ class SnowMan(EnemyObject.EnemyObject):
         
     def attack(self, Stage):
         super().attack()
-        if (self.isDead is False and self.isGetattack is False):
-            if (self.direction == 'left'):
-                Stage.appendProjectile(Projectile.Projectile(self.projectileimage, self.hitbox.left, Stage.GetMapLimit('onground') - 50, self.ATK, 'left'))
-            else:
-                Stage.appendProjectile(Projectile.Projectile(self.projectileimage, self.hitbox.right, Stage.GetMapLimit('onground') - 50, self.ATK, 'right'))
-                
+        
+        if (self.Attackable):
+            self.coolStart = pygame.time.get_ticks()
+            self.Attackable = False
+            
+    def updateCooldown(self):
+        '''
+        공격 쿨타임을 업데이트 시켜주는 함수
+        updateCondition내부에서만 쓰이는 함수임
+        '''
+        self.attackHitbox = False
+        self.coolElapsed = (pygame.time.get_ticks() - self.coolStart) / 1000
+        if (self.coolElapsed >= self.atkcool):
+            self.coolElapsed = 0
+            self.coolStart = 0
+            self.Attackable= True
+            
     def AI(self, Stage):
+        '''
+        기본적의 적의 AI
+        플레이어에 상태에 따라서 업데이트가 된다
+        '''
         distance = self.hitbox.centerx - (Stage.GetPlayer().GetPos('x') + Stage.GetPlayer().GetSize('width') / 2) #플레이어와 적과의 거리를 계산함
         if (abs(distance) <= 400 or self.HP != self.MAXHP):
             self.detectPlayer()
@@ -42,12 +56,11 @@ class SnowMan(EnemyObject.EnemyObject):
             else:
                 self.rightwalk()
                 
-        if (abs(distance) <= self.attackDistance):
+        if (abs(distance) <= self.attackRange):
             if (Stage.GetPlayer().GetCondition('hitbox')):
-                if (self.coolElapsed != 0):
+                if (self.coolElapsed != 0 and self.checkcollision(Stage.GetPlayer())):
                     self.static()
-                else:
-                    self.attack(Stage)
+                self.attack(Stage)
 
         for projectile in Stage.GetPlayer().GetProjectiles():
             if (len(Stage.GetPlayer().GetProjectiles()) != 0):

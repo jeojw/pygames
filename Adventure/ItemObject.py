@@ -8,12 +8,12 @@ pygame.init() # pygame 초기화
 '''
 아이템 아이콘, 이펙트 관련 변수
 '''
-ICE = 'char_sprite/ice.png'
-ARMOR = 'items/shield.png'
-HASTE = 'items/haste.png'
-ATTACKSPEED = 'items/attackspeed.png'
-HPRECOVERY = 'items/hprecovery.png'
-MAXHPUP = 'items/hpmaxup.png'
+ICE = 'Adventure/char_sprite/ice.png'
+ARMOR = 'Adventure/items/shield.png'
+HASTE = 'Adventure/items/haste.png'
+ATTACKSPEED = 'Adventure/items/attackspeed.png'
+HPRECOVERY = 'Adventure/items/hprecovery.png'
+MAXHPUP = 'Adventure/items/hpmaxup.png'
 
 class ItemObject(object):
     def __init__(self, x_pos, y_pos, image):
