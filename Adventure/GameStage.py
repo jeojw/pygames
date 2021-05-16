@@ -248,6 +248,13 @@ class GameStage(object):
                     pygame.quit()
                     sys.exit()
                     
+    def ResultScreen(self):
+        self.system.GetScreen().fill(self.system.GetColor('white'))
+        self.system.write(self.system.GetBigFont(), 'Congratulation!!! Stage All Clear!!', self.system.GetColor('blue'), 20, 200)
+        self.system.write(self.system.GetBigFont(), 'Total Score: ' + str(self.curScore + self.totalScore), self.system.GetColor('blue'), XMARGIN, 300)
+        pygame.display.update()
+        pygame.time.wait(1000)
+                    
     def SetEnemy(self, EnemyList):
         for enemy in EnemyList:
             if (enemy.GetName() == 'Seal'):

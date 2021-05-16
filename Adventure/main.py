@@ -77,7 +77,7 @@ def rungame(System, Stage):
             Stage.ClearScreen()
             return False
 
-        System.write(System.GetSmallFont(), str(Stage.GetEnemylist()[0].coolStart) + '   ' + str(Stage.GetEnemylist()[1].coolStart), System.GetColor('black'), 350, 20)
+        #System.write(System.GetSmallFont(), str(Stage.GetEnemylist()[0].coolStart) + '   ' + str(Stage.GetEnemylist()[1].coolStart), System.GetColor('black'), 350, 20)
         pygame.display.update()
         System.GetClock().tick(System.GetFPS())
         
@@ -100,12 +100,16 @@ def main():
             if (Stage.ClearStage):
                 if (level == len(Stage.mapImages)):
                     Stage.ResultScreen()
+                    level = 1
+                    break
                 level += 1
                 score += Stage.GetScore()
                 Stage.ResetStage()
                 break
             if (Stage.GameOver):
                 Stage.GameoverScreen()
+                
+            
     
 if (__name__ == '__main__'):
     main()
