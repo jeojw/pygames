@@ -74,7 +74,6 @@ class GameStage(object):
         
         self.Enemylist = []
         self.Itemlist = []
-        self.EnemyProjectileList = []
         
         self.PlayerStat = [750, 750, 1000, 0, 10]
         self.EnemyStatdic = {'Seal': [2500, 2500, 0, 20, 4.5],
@@ -165,21 +164,6 @@ class GameStage(object):
     
     def GetItemlist(self):
         return self.Itemlist
-    
-    def GetEnemyProjectiles(self):
-        return self.EnemyProjectileList
-    
-    def appendItem(self, Item):
-        self.Itemlist.append(Item)
-        
-    def removeItem(self, Item):
-        self.Itemlist.remove(Item)
-        
-    def appendProjectile(self, Proj):
-        self.EnemyProjectileList.append(Proj)
-    
-    def removeProjectile(self, Proj):
-        self.EnemyProjectileList.remove(Proj)
             
     def OpeningScreen(self):
         '''
