@@ -176,13 +176,13 @@ class EnemyObject(LifeObject.LifeObject):
             elif (self.direction == 'right'):
                 self.x_pos += self.SPEED
         
-        if (Stage.XCameraMoveable and (Stage.isXCameraMove or Stage.forceXMove)):
-            if (PlayerDirection == 'left'):
+        if (Stage.XCameraMoveable and Stage.isXCameraMove):
+            if (PlayerDirection == 'left' and Stage.GetPlayer().GetCondition('walk')): ## 차후 수정해야 할 부분
                 self.x_pos += PlayerSpeed
-            elif (PlayerDirection == 'right'):
+            if (PlayerDirection == 'right' or Stage.forceXMove):
                 self.x_pos -= PlayerSpeed
         
-        elif (not Stage.isXCameraMove and (self.x_pos <= self.system.GetXSize() and self.x_pos >= 0)):
+        if (not Stage.isXCameraMove and (self.hitbox.right <= self.system.GetXSize() and self.x_pos >= 0)):
             if (self.hitbox.left <= 0):
                 self.x_pos = 0 #좌표 보정인데.... 오류라서
             if (self.hitbox.right >= self.system.GetXSize()):
@@ -229,7 +229,7 @@ class EnemyObject(LifeObject.LifeObject):
         
         self.cursprite = self.spritelist[self.cur][self.index]
         if (self.direction == 'left'):
-            self.hitbox = self.cursprite.get_rect(bottomright=(self.x_pos + 70, self.y_pos)) #방향전환시 좌표오류를 잡아줌
+            self.hitbox = self.cursprite.get_rect(bottomright=(self.x_pos + self.spritelist[0][0].get_width(), self.y_pos)) #방향전환시 좌표오류를 잡아줌
         else:
             self.hitbox = self.cursprite.get_rect(bottomleft=(self.x_pos, self.y_pos))
             

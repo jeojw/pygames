@@ -36,13 +36,6 @@ HPRECOVERYICON = pygame.image.load(HPRECOVERY)
 MAXHPUPICON = pygame.image.load(MAXHPUP)
 COINICON = pygame.image.load(COIN)
 
-'''
-기본적인 스텟 함수
-'''
-PlayerStat = [750, 750, 1000, 0, 10]
-
-x_size = 800
-
 class PlayerObject(LifeObject.LifeObject):
     def __init__(self, System, x_pos, y_pos=None):
         '''
@@ -63,6 +56,8 @@ class PlayerObject(LifeObject.LifeObject):
         self.itemElapsed = 0 # 아이템 획득 후 경과시간
         self.atkcool = PLAYERATKCOOL
         
+        self.PlayerStat = [750, 750, 1000, 0, 10]
+        
         static = [pygame.image.load('Adventure/char_sprite/char_static.png')]
         dead = [pygame.image.load('Adventure/char_sprite/char_dead.png')]
         walk = [pygame.image.load('Adventure/char_sprite/char_walk_' + str(i) + '.png') for i in range(1, 4)]
@@ -80,10 +75,10 @@ class PlayerObject(LifeObject.LifeObject):
         플레이어의 체력을 제외한 모든 스텟 및 시간을 초기화시키는 메서드
         주로 아이템을 중복으로 먹었을 시에 활성화 됨
         '''
-        self.MAXHP = PlayerStat[0]
-        self.ATK = PlayerStat[2]
-        self.DEF = PlayerStat[3]
-        self.SPEED = PlayerStat[4]
+        self.MAXHP = self.PlayerStat[0]
+        self.ATK = self.PlayerStat[2]
+        self.DEF = self.PlayerStat[3]
+        self.SPEED = self.PlayerStat[4]
         self.projectileimage = BASIC
         
         self.duration = DURATION
@@ -231,16 +226,18 @@ class PlayerObject(LifeObject.LifeObject):
         '''
         super().updateCondition()
         for enemy in Stage.GetEnemylist():
-            if (self.isHitbox):
-                if (self.checkcollision(enemy) and enemy.GetCondition('atkhitbox')):
-                    self.getattack(enemy)
-                    
-        for projectile in Stage.GetEnemyProjectiles():
-            if (len(Stage.GetEnemyProjectiles()) != 0):
+            if (enemy.GetName() == 'Seal'):
                 if (self.isHitbox):
-                    if (self.checkcollision(projectile)):
+                    if (self.checkcollision(enemy) and enemy.GetCondition('atkhitbox')):
                         self.getattack(enemy)
-                        Stage.GetEnemyProjectiles().remove(projectile)
+            
+            if (enemy.GetName() == 'SnowMan'):
+                for projectile in enemy.GetProjectiles():
+                    if (len(enemy.GetProjectiles()) != 0):
+                        if (self.isHitbox):
+                            if (self.checkcollision(projectile)):
+                                self.getattack(enemy)
+                                enemy.GetProjectiles().remove(projectile)
                     
         if (self.isChangeStat):
             if (self.itemType == ICE):
@@ -273,15 +270,19 @@ class PlayerObject(LifeObject.LifeObject):
         self.hitbox.x = self.x_pos
         self.hitbox.bottom = self.y_pos
 
-        if (Stage.GetCameraView('x') <= Stage.map_x_size - x_size or Stage.GetCameraView('x') >= 0): ## check
+        if (Stage.GetCameraView('x') <= Stage.map_x_size - self.system.GetXSize() or Stage.GetCameraView('x') >= 0): ## check
             if (self.hitbox.centerx > Stage.GetCameraRange('x') and self.direction == 'right'):
-                if (Stage.XCameraMoveable):
+                if (Stage.XCameraMoveable and not Stage.forceXMove):
                     Stage.CameraXMovement(self.SPEED)
                     self.x_pos -= self.SPEED
-            elif (self.hitbox.centerx <= Stage.GetCameraRange('x') and Stage.GetCameraView('x') > 0 and self.direction == 'left'): ## check
+            if (self.hitbox.centerx <= Stage.GetCameraRange('x') and Stage.GetCameraView('x') > 0 and self.direction == 'left'): ## check
                 if (Stage.XCameraMoveable):
                     Stage.CameraXMovement(-self.SPEED)
                     self.x_pos += self.SPEED
+                    
+            if (Stage.forceXMove):
+                Stage.CameraXMovement(self.SPEED)
+                self.x_pos -= self.SPEED
                 
         if (Stage.XCameraMoveable is False):
             if (self.hitbox.left <= Stage.GetMapLimit('left')):

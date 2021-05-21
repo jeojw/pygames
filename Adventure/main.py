@@ -57,8 +57,8 @@ def rungame(System, Stage):
             
         for enemy in Stage.GetEnemylist():
             if (len(Stage.GetEnemylist()) != 0):
-                if (len(Stage.GetEnemyProjectiles()) != 0):
-                    for projectile in Stage.GetEnemyProjectiles():
+                if (len(enemy.GetProjectiles()) != 0):
+                    for projectile in enemy.GetProjectiles():
                         projectile.updatePos(Stage)
                         projectile.draw(System)
                 enemy.update(dt * 15, Stage)
@@ -73,11 +73,12 @@ def rungame(System, Stage):
             Stage.GameOver = True
             return False
         
-        if (Stage.ClearStage):
+        if (Stage.GetStageCondition('clear')):
             Stage.ClearScreen()
             return False
 
-        #System.write(System.GetSmallFont(), str(Stage.GetEnemylist()[0].coolStart) + '   ' + str(Stage.GetEnemylist()[1].coolStart), System.GetColor('black'), 350, 20)
+        System.write(System.GetSmallFont(), str(Stage.GetPlayer().isGetattack) + '   ' + 
+                     str(Stage.GetEnemylist()[1].Attackable), System.GetColor('black'), 350, 20)
         pygame.display.update()
         System.GetClock().tick(System.GetFPS())
         
@@ -97,8 +98,8 @@ def main():
             Stage.GameGuide()
         while True:
             rungame(System, Stage)
-            if (Stage.ClearStage):
-                if (level == len(Stage.mapImages)):
+            if (Stage.GetStageCondition('clear')): ## change
+                if (level == Stage.GetStageCount()): ## change
                     Stage.ResultScreen()
                     level = 1
                     break
@@ -106,7 +107,7 @@ def main():
                 score += Stage.GetScore()
                 Stage.ResetStage()
                 break
-            if (Stage.GameOver):
+            if (Stage.GetStageCondition('gameover')):
                 Stage.GameoverScreen()
                 
             

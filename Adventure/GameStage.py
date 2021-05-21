@@ -82,6 +82,9 @@ class GameStage(object):
                             'PolarBear': [4500, 4500, 180, 60, 3]}
         
     def GetMapSize(self, Type):
+        '''
+        맵 사이즈를 반환해주는 메서드
+        '''
         try:
             if (Type == 'x'):
                 return self.map_x_size
@@ -93,6 +96,9 @@ class GameStage(object):
             print(Type, 'is not size attribute!!!')
             
     def GetMapLimit(self, Type):
+        '''
+        보정 좌표를 반환해주는 메서드
+        '''
         try:
             if (Type == 'left'):
                 return self.MAP_LIMIT_LEFT
@@ -113,6 +119,9 @@ class GameStage(object):
         return self.PLAYER
     
     def GetCameraRange(self, pos):
+        '''
+        카메라 구동 범위를 반환해주는 메서드
+        '''
         try:
             if (pos == 'x'):
                 return self.CAMERAXMARGIN
@@ -136,6 +145,20 @@ class GameStage(object):
                 raise ValueError
         except ValueError:
             print(pos, 'is not Pos!!!')
+            
+    def GetStageCondition(self, condition):
+        try:
+            if (condition == 'clear'):
+                return self.ClearStage
+            elif (condition == 'gameover'):
+                return self.GameOver
+            else:
+                raise ValueError
+        except ValueError:
+            print(condition, 'is not Condition variable!!!')
+            
+    def GetStageCount(self):
+        return len(self.mapImages)
             
     def GetEnemylist(self):
         return self.Enemylist
@@ -361,9 +384,11 @@ class GameStage(object):
         if (self.CameraPos[0] + self.system.GetXSize() >= self.map_x_size):
             self.CameraPos[0] = self.map_x_size - self.system.GetXSize()
             self.XCameraMoveable = False
+            self.isXCameraMove = False
         elif (PlayerCenterX <= self.CAMERAXMARGIN and self.CameraPos[0] <= 0):
             self.CameraPos[0] = 0
             self.XCameraMoveable = False
+            self.isXCameraMove = False
             
         for enemy in self.Enemylist:
             if (enemy.GetPos('x') <= self.system.GetXSize() - enemy.GetSize('width') and enemy.GetPos('x') >= 0):
@@ -372,14 +397,36 @@ class GameStage(object):
                     self.XCameraMoveable = False
                 elif (all(self.curDeadbool) and (self.CameraPos[0] > 0 and self.CameraPos[0] < self.map_x_size - self.system.GetXSize())):
                     self.XCameraMoveable = True
-                if (PlayerCenterX > self.CAMERAXMARGIN and self.CameraDirection == 'right' and self.XCameraMoveable):
-                    self.forceXMove = True
+                if (self.XCameraMoveable):
+                    if (self.CameraDirection == 'left'):
+                        if (PlayerCenterX - 10 > self.CAMERAXMARGIN):
+                            self.forceXMove = True
+                        else:
+                            self.forceXMove = False
+                    else:
+                        if (PlayerCenterX > self.CAMERAXMARGIN):
+                            self.forceXMove = True
+                        else:
+                            self.forceXMove = False
                 else:
                     self.forceXMove = False
-        if (self.PLAYER.GetCondition('walk')):
-            self.isXCameraMove = True
-        else:
-            self.isXCameraMove = False
+        if (self.XCameraMoveable or self.forceXMove):
+            if (self.CameraDirection == 'left'):
+                if (PlayerCenterX - 10 > self.CAMERAXMARGIN):
+                    self.isXCameraMove = True
+                else:
+                    if (self.PLAYER.GetCondition('walk')):
+                        self.isXCameraMove = True
+                    else:
+                        self.isXCameraMove = False
+            else:
+                if (PlayerCenterX > self.CAMERAXMARGIN):
+                    self.isXCameraMove = True
+                else:
+                    if (self.PLAYER.GetCondition('walk')):
+                        self.isXCameraMove = True
+                    else:
+                        self.isXCameraMove = False
         
         if (not self.XCameraMoveable):
             if (self.CameraPos[0] >= self.map_x_size - self.system.GetXSize()):
@@ -392,7 +439,7 @@ class GameStage(object):
         if (self.PLAYER.GetCondition('onground')):
             self.CameraPos[1] = 0
             
-    def removeProjectile(self):
+    def UpdateProjectile(self):
         '''
         투사체가 맵 밖으로 나갈 때 지우는 메서드
         '''
@@ -402,10 +449,11 @@ class GameStage(object):
             if (projectile.GetPos('x') <= self.MAP_LIMIT_LEFT or projectile.GetPos('x') + projectile.GetSize('width') >= self.MAP_LIMIT_RIGHT):
                 PlayerProjectile.remove(projectile)
                 
-        for projectile in self.EnemyProjectileList:
-            if ((projectile.GetPos('x') <= self.MAP_LIMIT_LEFT or projectile.GetPos('x') + projectile.GetSize('width') >= self.MAP_LIMIT_RIGHT) or
-                abs(projectile.GetPos('x') - projectile.GetInitPos('x')) > SNOWBALLRANGE):
-                self.EnemyProjectileList.remove(projectile)
+        for enemy in self.GetEnemylist():
+            for projectile in enemy.GetProjectiles():
+                if ((projectile.GetPos('x') <= self.MAP_LIMIT_LEFT or projectile.GetPos('x') + projectile.GetSize('width') >= self.MAP_LIMIT_RIGHT) or
+                    abs(projectile.GetPos('x') - projectile.GetInitPos('x')) > SNOWBALLRANGE):
+                    enemy.GetProjectiles().remove(projectile)
                     
     def UpdateStage(self):
         '''
@@ -413,5 +461,5 @@ class GameStage(object):
         '''
         self.UpdateCamera()
         self.UpdateEnemy()
-        self.removeProjectile()
+        self.UpdateProjectile()
         self.UpdateScore()

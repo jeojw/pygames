@@ -32,9 +32,9 @@ class SnowMan(EnemyObject.EnemyObject):
             self.coolStart = pygame.time.get_ticks() # 여기에서 쿨다운 시전
             self.isThrow = True
             if (self.direction == 'left'):
-                Stage.appendProjectile(Projectile.Projectile(self.projectileimage, self.hitbox.left, Stage.GetMapLimit('onground') - 50, self.ATK, 'left'))
+                self.projectilelist.append(Projectile.Projectile(self.projectileimage, self.hitbox.left, Stage.GetMapLimit('onground') - 50, self.ATK, 'left'))
             else:
-                Stage.appendProjectile(Projectile.Projectile(self.projectileimage, self.hitbox.right, Stage.GetMapLimit('onground') - 50, self.ATK, 'right'))
+                self.projectilelist.append(Projectile.Projectile(self.projectileimage, self.hitbox.right, Stage.GetMapLimit('onground') - 50, self.ATK, 'right'))
                 
     def updateCooldown(self):
         '''

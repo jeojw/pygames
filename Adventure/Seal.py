@@ -24,11 +24,7 @@ class Seal(EnemyObject.EnemyObject):
         
     def attack(self, Stage):
         super().attack()
-        
-        if (self.Attackable):
-            self.coolStart = pygame.time.get_ticks()
-            self.Attackable = False
-            
+
     def updateCooldown(self):
         '''
         공격 쿨타임을 업데이트 시켜주는 함수
@@ -39,7 +35,29 @@ class Seal(EnemyObject.EnemyObject):
         if (self.coolElapsed >= self.atkcool):
             self.coolElapsed = 0
             self.coolStart = 0
-            self.Attackable= True
+            
+    def updateCondition(self):
+        '''
+        오브젝트의 컨디션을 업데이트 시켜주는 함수
+        불값을 기반으로 업데이트 시켜줌
+        '''
+        if (self.HP <= 0):
+            self.dead()
+            
+        if (self.isWalk):
+            self.Condition = 'walk'
+        elif (self.isAttack):
+            self.Condition = 'attack'
+        elif (self.isGetattack):
+            self.Condition = 'getattack'
+        elif (self.isDead):
+            self.Condition = 'dead'
+        elif (self.isWalk is False and self.isAttack is False and
+              self.isGetattack is False and self.isDead is False):
+            self.Condition = 'static'
+            
+        if (not self.Attackable):
+            self.updateCooldown()
             
     def AI(self, Stage):
         '''

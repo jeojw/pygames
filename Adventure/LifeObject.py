@@ -279,6 +279,7 @@ class LifeObject(object):
         self.isDead = True
         self.KNOCKBACK = 0
         self.isHitbox = False
+        self.attackHitbox = False
         self.isWalk = False
         self.isAttack = False
         self.isGetattack = False
