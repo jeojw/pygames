@@ -164,6 +164,12 @@ class GameStage(object):
     
     def GetItemlist(self):
         return self.Itemlist
+    
+    def appendItem(self, item):
+        self.Itemlist.append(item)
+        
+    def removeItem(self, item):
+        self.Itemlist.remove(item)
             
     def OpeningScreen(self):
         '''
