@@ -4,28 +4,25 @@ import pygame
 class HitBox(System.System):
     def __init__(self, Sprite, x_pos, y_pos):
         super().__init__()
-        self.HitBox = Sprite.get_rect(topleft=(x_pos, y_pos))
+        self.pos = pygame.math.Vector2(x_pos, y_pos)
+        self.Object = Sprite.get_rect(topleft=(x_pos, y_pos))
         self.Collidable = True
         
     def Draw(self):
-        pygame.draw.rect(self.GAMESCREEN, (255, 0, 0), [self.HitBox.x, self.HitBox.y, self.HitBox.width, self.HitBox.height], 2)
+        pygame.draw.rect(self.GAMESCREEN, (255, 0, 0), [self.Object.x, self.Object.y, self.Object.width, self.Object.height], 2)
         
     def GetPos(self, t, center=None):
-        if (center is not None):
-            try:
-                if (t == 'x'):
-                    return self.HitBox.centerx
-                elif (t == 'y'):
-                    return self.HitBox.centery
-                else:
-                    raise ValueError
-            except ValueError:
-                return -1
         try:
             if (t == 'x'):
-                return self.HitBox.x
+                if (center is not None):
+                    return self.Object.centerx
+                else:
+                    return self.pos.x
             elif (t == 'y'):
-                return self.HitBox.y
+                 if (center is not None):
+                    return self.Object.centery
+                 else:
+                    return self.pos.y
             else:
                 raise ValueError
         except ValueError:
@@ -34,17 +31,21 @@ class HitBox(System.System):
     def GetSize(self, t):
         try:
             if (t == 'w'):
-                return self.HitBox.width
+                return self.Object.width
             elif (t == 'h'):
-                return self.HitBox.height
+                return self.Object.height
             else:
                 raise ValueError
         except ValueError:
             return -1
         
     def CheckCollision(self, Another):
-        return pygame.Rect.colliderect(self.HitBox, Another.HitBox)
+        if (self.Collidable):
+            return pygame.Rect.colliderect(self.Object, Another.Object)
     
-    def Update(self, x_pos, y_pos):
-        self.HitBox.x = x_pos
-        self.HitBox.y = y_pos
+    def UpdateSize(self, newSprite):
+        self.Object = newSprite.get_rect(topleft=(self.pos.x, self.pos.y))
+    
+    def UpdatePos(self, x_pos, y_pos):
+        self.pos = pygame.math.Vector2(x_pos, y_pos)
+        self.Object.topleft = (self.pos.x, self.pos.y)

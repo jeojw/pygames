@@ -1,8 +1,9 @@
 import pygame
 import System
+import Queue
 import HitBox
 
-LEFTUP = 'LEFTUP'
+samplesprite = pygame.image.load('ShootingGame/Sprite/AIRCRAFT_SAMPLE.png')
 
 class AirCraft(System.System):
     def __init__(self, x_pos, y_pos):
@@ -13,14 +14,18 @@ class AirCraft(System.System):
         self.isAttack = True
         self.isMove = False
         self.isDead = False
-        self.isGetAttack = False
+        self.isGetAttack = False #일단 보류...
         self.Condition = None
-        self.SpriteList = []
-        self.cursprite = None
+        self.SpriteList = [samplesprite]
+        self.index = 0
+        self.HitBox = HitBox.HitBox(self.SpriteList[self.index], self.pos.x, self.pos.y)
         self.direction = None
         
+        self.SizeQueue = Queue.Queue()
+        
     def Move(self):
-        self.isMove = True
+        if (not self.isDead):
+            self.isMove = True
         
     def Left(self):
         self.direction = 'LEFT'
@@ -37,12 +42,12 @@ class AirCraft(System.System):
     def Static(self):
         self.isMove = False
         self.direction = None
-        
-    def GetAttack(self, Another):
-        pass
     
     def DrawPos(self):
-        self.GAMESCREEN.blit(self.cursprite, (self.pos.x, self.pos.y))
+        self.GAMESCREEN.blit(self.SpriteList[self.index], (self.pos.x, self.pos.y))
         
     def UpdatePos(self):
-        pass
+        before = self.SizeQueue.dequeue()
+        diffPos = pygame.math.Vector2(abs(self.HitBox.GetSize('w') - before[0]), abs(self.HitBox.GetSize('h') - before[1]))
+        self.pos -= diffPos
+        self.SizeQueue.enqueue((self.HitBox.GetSize('w'), self.HitBox.GetSize('h')))

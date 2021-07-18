@@ -8,13 +8,12 @@ class Bullet(System.System):
         self.sprite = Sprite
         self.pos = pygame.math.Vector2(x_pos, y_pos)
         self.angle = angle
+        self.VEL = pygame.math.Vector2(0, 10)
         if (self.angle is not None):
             self.sprite = pygame.transform.rotate(self.sprite, self.angle)
-            self.HitBox = HitBox.HitBox(self.sprite, x_pos, y_pos)
-        else:
-            self.HitBox = HitBox.HitBox(self.sprite, x_pos, y_pos)
-        self.VEL = pygame.math.Vector2(0, 10)
-        
+            self.VEL = self.VEL.rotate(-self.angle)
+        self.HitBox = HitBox.HitBox(self.sprite, x_pos, y_pos)
+
         self.ATK = ATK
         
     def GetPos(self, t):
@@ -33,4 +32,4 @@ class Bullet(System.System):
 
     def Update(self):
         self.pos -= self.VEL
-        self.HitBox.Update(self.pos.x, self.pos.y)
+        self.HitBox.UpdatePos(self.pos.x, self.pos.y)

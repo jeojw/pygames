@@ -2,9 +2,10 @@ import pygame
 
 class System(object):
     def __init__(self):
-        self.SCREENSIZE = (800, 1000)
+        self.SCREENSIZE = (1000, 1000)
         self.writeXMARGIN = 200
         self.writeYMARGIN = 200
+        self.LIMITSIZE = pygame.math.Vector2(700, 1000)
         
         self.FPSCLOCK = pygame.time.Clock()
         self.GAMESCREEN = pygame.display.set_mode(self.SCREENSIZE)

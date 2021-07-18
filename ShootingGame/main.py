@@ -8,8 +8,7 @@ sprite = pygame.image.load('ShootingGame/Sprite/AIRCRAFT_SAMPLE.png')
 def rungame(Sys, Stage):
     while True:
         Sys.GAMESCREEN.fill(Sys.COLORDIC['WHITE'])
-        pygame.draw.rect(Sys.GAMESCREEN, Sys.COLORDIC['BLUE'], (250, 690, 10, 30))
-        pygame.draw.rect(Sys.GAMESCREEN, Sys.COLORDIC['BLUE'], (250, 690, 40, 40))
+        pygame.draw.rect(Sys.GAMESCREEN, Sys.COLORDIC['BLUE'], (700, 0, 300, 1000))
         
         for event in pygame.event.get():
             if (event.type == pygame.QUIT):
@@ -46,7 +45,7 @@ def rungame(Sys, Stage):
         Stage.Update()
         Stage.Draw()
         
-        Sys.InputText(Sys.SMALLFONT, str(len(Stage.PLAYER.ProjectileList)), Sys.COLORDIC['BLACK'], 30, 30)
+        Sys.InputText(Sys.SMALLFONT, str(999), Sys.COLORDIC['BLACK'], 30, 30)
         pygame.display.update()
         Sys.FPSCLOCK.tick(60)
 
