@@ -73,7 +73,7 @@ class Stage(System.System):
             enemy.Update(self.PLAYER)
             enemy.Draw()
         
-        self.BOSS.Update(self.PLAYER)
+        self.BOSS.Update(self.PLAYER, 10)
         self.BOSS.Draw()
     
     def Update(self):

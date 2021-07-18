@@ -92,6 +92,7 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
     def UpdateSprite(self, dt):
         if (self.Condition == 'NORMAL'):
             pass
+        
         if (self.pattern == 'LASER'):
             self.conindex = 1
             self.index = 0
