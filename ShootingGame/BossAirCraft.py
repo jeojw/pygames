@@ -5,10 +5,10 @@ import HitBox
 import Bullet
 
 Boss = pygame.image.load('ShootingGame/Sprite/Boss/Boss_Sprite.png')
-BossLaser = pygame.image.load('ShootingGame/Sprite/Boss/Boss_laser.png')
+BossLaser = [pygame.image.load('ShootingGame/Sprite/Boss/Boss_Laser_' + str(i) +_'.png') for i in range(0, 6)]
+BossSpinBullet = [pygame.image.load('ShootingGame/Sprite/Boss/Boss_Spin_' + str(i) +_'.png') for i in range(0, 6)]
 laser = pygame.image.load('ShootingGame/Sprite/Bullet/laser.png')
 BossSprite = pygame.transform.scale(Boss, (600, 450))
-BossLaserSprite = pygame.transform.scale(BossLaser, (600, 450))
 LaserSprite = pygame.transform.scale(laser, (18, 240))
 
 class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
@@ -18,8 +18,9 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
         self.isExist = False
         self.conindex = 0
         self.index = 0
-        self.SpriteList = [BossSprite, BossLaserSprite, None]
-        self.HitBox = HitBox.HitBox(self.SpriteList[self.index], self.pos.x, self.pos.y)
+        self.SpriteList = [[BossSprite], [pygame.trasform.scale(sp, (600, 540)) for sp in BossLaser], 
+                           [pygame.trasform.scale(sp, (600, 450)) for sp in BossSpinBullet], []]
+        self.HitBox = HitBox.HitBox(BossSprite, self.pos.x, self.pos.y)
         self.SizeQueue.enqueue((self.HitBox.GetSize('w'), self.HitBox.GetSize('h')))
         self.pattern = None
         
@@ -49,6 +50,7 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
         pass
     
     def AI(self):
+        self.SetBullets('Normal')
         self.PatternQueue.enqueue(self.pattern_1)
         
     def DrawStat(self):
@@ -82,15 +84,30 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
         if (self.pos.y + self.HitBox.GetSize('h') < 400):
             self.pos -= self.VEL * 1.5
         else:
+            self.index = 1
             self.Static()
             
         self.HitBox.UpdatePos(self.pos.x, self.pos.y)
         
-    def UpdateSprite(self):
-        if (self.isDead):
-            self.index = len(self.SpriteList) - 1
-            
+    def UpdateSprite(self, dt):
+        if (self.Condition == 'NORMAL'):
+            pass
         if (self.pattern == 'LASER'):
-            self.index = 1
+            self.conindex = 1
+            self.index = 0
+        elif (self.pattern == 'SPIN'):
+            self.conindex = 2
+            self.index = 0
+        elif (self.isDead):
+            self.conindex = 3
+            self.index = 0
             
-        self.HitBox.UpdateSize(self.SpriteList[self.index])
+        self.index += 1
+        if (self.index >= len(self.SpriteList[self.conindex])):
+            self.index = len(self.SpriteList[self.conindex]) - 1
+        
+    def Update(self, Player, dt):
+         self.UpdateStat(Player)
+        self.UpdateCondition()
+        self.UpdatePos(Player)
+        self.UpdateSprite(dt)
