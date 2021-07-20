@@ -15,7 +15,6 @@ class AirCraft(System.System):
         self.isMove = False
         self.isDead = False
         self.isGetAttack = False #일단 보류...
-        self.Condition = None
         self.SpriteList = [samplesprite]
         self.index = 0
         self.HitBox = HitBox.HitBox(self.SpriteList[self.index], self.pos.x, self.pos.y)

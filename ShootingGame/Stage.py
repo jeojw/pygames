@@ -22,7 +22,7 @@ class Stage(System.System):
         
     def SetStage(self, level):
         self.PLAYER = PlayerAirCraft.PlayerAirCraft(360, 700)
-        self.BOSS = BossAirCraft.BossAirCraft(1000000, 3000, 10, -2500)
+        self.BOSS = BossAirCraft.BossAirCraft(1000000, 3000, 10, 100)
 
     def Draw(self):
         pass
@@ -68,16 +68,16 @@ class Stage(System.System):
             item.Update()
             item.Draw()
     
-    def UpdateEnemy(self):
+    def UpdateEnemy(self, dt):
         for enemy in self.EnemyList:
             enemy.Update(self.PLAYER)
             enemy.Draw()
         
-        self.BOSS.Update(self.PLAYER, 10)
+        self.BOSS.Update(self.PLAYER, dt * 50)
         self.BOSS.Draw()
     
-    def Update(self):
+    def Update(self, dt):
         self.UpdateBullets()
         self.UpdateScore()
         self.UpdateItem()
-        self.UpdateEnemy()
+        self.UpdateEnemy(dt)

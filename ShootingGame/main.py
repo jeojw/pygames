@@ -7,6 +7,8 @@ sprite = pygame.image.load('ShootingGame/Sprite/AIRCRAFT_SAMPLE.png')
 
 def rungame(Sys, Stage):
     while True:
+        dt = Sys.FPSCLOCK.tick(Sys.FPS) / 1000
+        
         Sys.GAMESCREEN.fill(Sys.COLORDIC['WHITE'])
         pygame.draw.rect(Sys.GAMESCREEN, Sys.COLORDIC['BLUE'], (700, 0, 300, 1000))
         
@@ -42,10 +44,10 @@ def rungame(Sys, Stage):
         
         Stage.PLAYER.Update(Stage)
         Stage.PLAYER.Draw()
-        Stage.Update()
+        Stage.Update(dt)
         Stage.Draw()
         
-        Sys.InputText(Sys.SMALLFONT, str(999), Sys.COLORDIC['BLACK'], 30, 30)
+        Sys.InputText(Sys.SMALLFONT, str(Stage.BOSS.index) + '  ' + str(Stage.BOSS.pattern[0]) + '  ' + str(Stage.BOSS.LaserElapsed), Sys.COLORDIC['BLUE'], 30, 30)
         pygame.display.update()
         Sys.FPSCLOCK.tick(60)
 
