@@ -17,37 +17,59 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
         
         self.isExist = False
         self.isChangeCondition = False
+        self.AddPattern = False
+        self.ChangePattern = False
+        self.isLaser = False
+        self.isPattern = False
+        self.isNormal = False
         self.conindex = 0
         self.index = 0
         self.SpriteList = [[BossSprite], 
                            [pygame.transform.scale(sp, (600, 540)) for sp in BossLaser], 
                            [pygame.transform.scale(sp, (600, 450)) for sp in BossSpinBullet], 
-                           []]
+                           []
+                          ]
         self.HitBox = HitBox.HitBox(BossSprite, self.pos.x, self.pos.y)
         self.SizeQueue.enqueue((self.HitBox.GetSize('w'), self.HitBox.GetSize('h')))
-        self.pattern = ('None', None)
-        
-        self.LaserTime = 5
-        self.LaserStart = 0
-        self.LaserElapsed = 0 
-        
-        self.PatternQueue = Queue.Queue()
-        self.PatternQueue.enqueue(('LASER', self.pattern_1()))
-        self.PatternQueue.enqueue(('LASER', self.pattern_1()))
-        #self.PatternQueue.enqueue(('TBD', self.pattern_3()))
-        self.patterndelay = 0.5
-        
-        self.Changedelay = 0.5
-        self.StartChange = 0
-        self.ElapsedChange = 0
+        self.CurPattern = ('NORMAL', None)
+        self.NextPattern = None
         
         self.PatternCool = 5
         self.CoolStart = 0
         self.CoolElapsed = 0
         
-        self.PatternDelay = 2
-        self.StartPattern = 0
-        self.ElapsedPattern = 0
+        self.LaserCool = 7
+        self.LCStart = 0
+        self.LCElapsed = 0
+        
+        self.SpinCool = 7
+        self.SCStart = 0
+        self.SCElapsed = 0
+        
+        self.LaserTime = 4
+        self.LaserStart = 0
+        self.LaserElapsed = 0
+        
+        self.NormalTime = 2
+        self.NormalStart = 0
+        self.NormalElapsed = 0
+        
+        self.SpinTime = 2
+        self.SpinStart = 0
+        self.SpinElapsed = 0
+        
+        self.PatternQueue = Queue.Queue()
+        self.PatternQueue.enqueue(('LASER', self.pattern_1()))
+        self.PatternQueue.enqueue(('LASER', self.pattern_1()))
+        self.PatterList = [('NORMAL', None), 
+                           ('LASER', self.pattern_1()), 
+                           ('SPINBULLET', self.pattern_2()), 
+                           ('TBD', self.pattern_3())
+                          ]
+        
+        self.Changedelay = 0.5
+        self.StartChange = 0
+        self.ElapsedChange = 0
         
         self.current_time = 0
         self.animation_time = round(100 / len(self.SpriteList[self.conindex] * 100), 2)
@@ -61,14 +83,13 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
         
         elif (Type == 'SPINBULLET'):
             pass
-    
+        
     def pattern_1(self):
-        if (self.pattern[0] != 'LASER'):
+        if (self.CurPattern[0] != 'LASER'):
             self.isChangeCondition = True
             self.StartChange = pygame.time.get_ticks()
         
-        self.CoolStart = pygame.time.get_ticks()
-        
+        self.isLaser = True
         if (self.index == len(self.SpriteList[1]) - 1):
             self.SetBullets('LASER')
             
@@ -78,25 +99,71 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
     def pattern_3(self):
         pass
     
-    def AI(self):
-        if (self.pattern[0] == 'None'):
+    def PatternCycle(self):  
+        if (self.ChangePattern):
+            self.CurPattern = self.NextPattern
+            self.CoolStart = pygame.time.get_ticks()
+            self.ChangePattern = False
+            
+        if (self.isNormal):
+            self.CurPattern = ('NORMAL', None)
+            self.CoolStart = pygame.time.get_ticks()
+            self.isNormal = False
+        
+        if (self.CurPattern[0] == 'NORMAL'):
+            self.StartChange = pygame.time.get_ticks()
             self.SetBullets('NORMAL')
+            self.UpdatePattern()
         
-        if (not self.PatternQueue.isEmpty()):
-            self.pattern = self.PatternQueue.dequeue()
-        
-        if (self.pattern[0] == 'LASER'):
+        elif (self.CurPattern[0] == 'LASER'):
+            self.NextPattern = ('NORMAL', None)
+            self.SetBullets('LASER')
             self.LaserElapsed = (pygame.time.get_ticks() - self.LaserStart) / 1000
             if (self.LaserElapsed > self.LaserTime):
+                self.LCStart = pygame.time.get_ticks()
                 self.LaserElapsed = 0
                 self.LaserTime = 0
-                self.CoolElapsed = (pygame.time.get_ticks() - self.StartCool) / 1000
-                if (self.CoolElapsed > self.PatternCool):
-                    self.CoolElapsed = 0
-                    self.StartCool = 0
-                    self.PatternQueue.enqueue(self.pattern_1())
+                self.AddPattern = True
+                if (self.index == 0):
+                    self.isLaser = False
+                    self.isNormal = True
+                    
+                self.UpdatePattern()
                 
-        elif (self.pattern[0] == 'SPINBULLET'):
+        elif (self.CurPattern[0] == 'SPINBULLET'):
+            pass
+            
+        elif (self.CurPattern[0] == 'TBD'):
+            pass
+        
+    def UpdatePattern(self):
+        if (self.NextPattern is None):
+            self.NextPattern = self.PatternQueue.dequeue()
+        
+        self.CoolElapsed = (pygame.time.get_ticks() - self.CoolStart) / 1000
+        if (self.CoolElapsed > self.PatternCool):
+            self.CoolElapsed = 0
+            self.CoolStart = 0
+            
+            if (self.LCStart != 0): # 시간경과가 안됨... 코드 바꿔야 할듯
+                self.LCElapsed = (pygame.time.get_ticks() - self.LCStart) / 1000
+                if (self.LCElapsed > self.LaserCool):
+                    self.PatternQueue.enqueue(('LASER', self.pattern_1()))
+                    self.LCElapsed = 0
+                    self.LCStart = 0
+            
+        if (self.CurPattern[0] == 'NORMAL'):
+            self.ChangePattern = True
+            
+        if (self.NextPattern[0] == 'LASER'):
+            self.AddPattern = False
+            self.ChangePattern = True
+            self.LaserStart = pygame.time.get_ticks()
+                    
+        elif (self.NextPattern[0]  == 'SPINBULLET'):
+            pass
+            
+        elif (self.NextPattern[0]  == 'TBD'):
             pass
             
     def UpdateCycle(self):
@@ -124,7 +191,6 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
                 self.HP -= (bullet.ATK - self.DEF)
     
     def UpdateCondition(self):
-        self.pattern = ('LASER', self.pattern_1())
         if (self.HP <= 0):
             self.isDead = True
             self.HitBox.Collidable = False
@@ -148,13 +214,13 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
     def UpdateSprite(self, dt):
         self.current_time += dt
         
-        if (self.pattern[0] == 'None'):
+        if (self.CurPattern[0] == 'NORMAL'):
             self.conindex = 0
             self.UpdateCycle()
-        if (self.pattern[0] == 'LASER'):
+        elif (self.CurPattern[0] == 'LASER'):
             self.conindex = 1
             self.UpdateCycle()
-        elif (self.pattern[0] == 'SPINBULLET'):
+        elif (self.CurPattern[0] == 'SPINBULLET'):
             self.conindex = 2
             self.UpdateCycle()
         elif (self.isDead):
@@ -164,7 +230,7 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
         if (self.current_time >= self.animation_time):
             self.current_time = 0
 
-            if (self.pattern[0] == 'LASER'):
+            if (self.CurPattern[0] == 'LASER'):
                 if (self.LaserElapsed != 0):
                     self.index += 1
                     if (self.index >= len(self.SpriteList[self.conindex])):
@@ -180,7 +246,7 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
                     self.index = 0
         
     def Update(self, Player, dt):
-        self.AI()
+        self.PatternCycle()
         self.UpdateStat(Player)
         self.UpdateCondition()
         self.UpdatePos(Player)
