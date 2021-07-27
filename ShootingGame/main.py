@@ -17,7 +17,7 @@ def rungame(Sys, Stage):
                 pygame.quit()
                 sys.exit()
 
-            if (event.type == pygame.KEYDOWN):
+            elif (event.type == pygame.KEYDOWN):
                 if (event.key == pygame.K_LEFT):
                     Stage.PLAYER.Left()
                     Stage.PLAYER.Move()
@@ -34,7 +34,7 @@ def rungame(Sys, Stage):
                     pygame.quit()
                     sys.exit()
                     
-            if (event.type == pygame.KEYUP):
+            elif (event.type == pygame.KEYUP):
                 if (event.key == pygame.K_LEFT or
                     event.key == pygame.K_RIGHT or
                     event.key == pygame.K_UP or
@@ -48,10 +48,10 @@ def rungame(Sys, Stage):
         
         Sys.InputText(Sys.SMALLFONT, str(Stage.BOSS.LaserElapsed) + '  ' 
                       + str(Stage.BOSS.PatternQueue.size()) + '  ' 
-                      + str(Stage.BOSS.NextPattern) + '  ' 
-                      + str(Stage.BOSS.LCElapsed), Sys.COLORDIC['BLUE'], 30, 30)
+                      + str(Stage.BOSS.CurPattern) + '  ' 
+                      + str(Stage.BOSS.conindex), Sys.COLORDIC['BLUE'], 30, 30)
         pygame.display.update()
-        Sys.FPSCLOCK.tick(60)
+        Sys.FPSCLOCK.tick(Sys.FPS)
 
 def main():
     pygame.init()

@@ -17,7 +17,6 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
         
         self.isExist = False
         self.isChangeCondition = False
-        self.AddPattern = False
         self.ChangePattern = False
         self.isLaser = False
         self.isPattern = False
@@ -33,6 +32,10 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
         self.SizeQueue.enqueue((self.HitBox.GetSize('w'), self.HitBox.GetSize('h')))
         self.CurPattern = ('NORMAL', None)
         self.NextPattern = None
+        
+        self.InitCool = 8 # 초기 쿨타임(조우시)
+        self.InitStart = 0
+        self.InitElapsed = 0
         
         self.PatternCool = 5
         self.CoolStart = 0
@@ -59,7 +62,6 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
         self.SpinElapsed = 0
         
         self.PatternQueue = Queue.Queue()
-        self.PatternQueue.enqueue(('LASER', self.pattern_1()))
         self.PatternQueue.enqueue(('LASER', self.pattern_1()))
         self.PatterList = [('NORMAL', None), 
                            ('LASER', self.pattern_1()), 
@@ -99,7 +101,14 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
     def pattern_3(self):
         pass
     
-    def PatternCycle(self):  
+    def PatternCycle(self):
+        '''
+        if (self.isDetect):
+            self.InitStart = pygame.time.get_ticks()
+            self.isDetect = False
+            self.ChangePattern = False ## *** 추구 지켜봐야할 코드
+        '''
+        
         if (self.ChangePattern):
             self.CurPattern = self.NextPattern
             self.CoolStart = pygame.time.get_ticks()
@@ -107,7 +116,6 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
             
         if (self.isNormal):
             self.CurPattern = ('NORMAL', None)
-            self.CoolStart = pygame.time.get_ticks()
             self.isNormal = False
         
         if (self.CurPattern[0] == 'NORMAL'):
@@ -116,15 +124,13 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
             self.UpdatePattern()
         
         elif (self.CurPattern[0] == 'LASER'):
-            self.NextPattern = ('NORMAL', None)
             self.SetBullets('LASER')
             self.LaserElapsed = (pygame.time.get_ticks() - self.LaserStart) / 1000
             if (self.LaserElapsed > self.LaserTime):
                 self.LCStart = pygame.time.get_ticks()
                 self.LaserElapsed = 0
                 self.LaserTime = 0
-                self.AddPattern = True
-                if (self.index == 0):
+                if (self.index == 0 and self.conindex == 1):
                     self.isLaser = False
                     self.isNormal = True
                     
@@ -137,34 +143,40 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
             pass
         
     def UpdatePattern(self):
-        if (self.NextPattern is None):
-            self.NextPattern = self.PatternQueue.dequeue()
+        '''
+        self.InitElapsed = (pygame.time.get_ticks() - self.InitStart) / 1000
+        if (self.InitElapsed != 0):
+            return -1
+            
+        if (self.InitElapsed > self.InitCool):
+            self.InitElapsed = 0
+            self.InitStart = 0
+        '''
+            
+        self.NextPattern = self.PatternQueue.dequeue()
         
         self.CoolElapsed = (pygame.time.get_ticks() - self.CoolStart) / 1000
         if (self.CoolElapsed > self.PatternCool):
             self.CoolElapsed = 0
             self.CoolStart = 0
             
-            if (self.LCStart != 0): # 시간경과가 안됨... 코드 바꿔야 할듯
+            if (self.LCStart != 0):
                 self.LCElapsed = (pygame.time.get_ticks() - self.LCStart) / 1000
                 if (self.LCElapsed > self.LaserCool):
                     self.PatternQueue.enqueue(('LASER', self.pattern_1()))
                     self.LCElapsed = 0
                     self.LCStart = 0
-            
-        if (self.CurPattern[0] == 'NORMAL'):
-            self.ChangePattern = True
-            
-        if (self.NextPattern[0] == 'LASER'):
-            self.AddPattern = False
-            self.ChangePattern = True
-            self.LaserStart = pygame.time.get_ticks()
+        
+        if (self.NextPattern is not None):
+            if (self.NextPattern[0] == 'LASER'):
+                self.ChangePattern = True
+                self.LaserStart = pygame.time.get_ticks()
                     
-        elif (self.NextPattern[0]  == 'SPINBULLET'):
-            pass
+            elif (self.NextPattern[0]  == 'SPINBULLET'):
+                pass
             
-        elif (self.NextPattern[0]  == 'TBD'):
-            pass
+            elif (self.NextPattern[0]  == 'TBD'):
+                pass
             
     def UpdateCycle(self):
         self.ElapsedChange = (pygame.time.get_ticks() - self.StartChange) / 1000
