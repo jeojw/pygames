@@ -46,10 +46,10 @@ def rungame(Sys, Stage):
         Stage.Update(dt)
         Stage.Draw()
         
-        Sys.InputText(Sys.SMALLFONT, str(Stage.BOSS.LaserElapsed) + '  ' 
-                      + str(Stage.BOSS.PatternQueue.size()) + '  ' 
-                      + str(Stage.BOSS.CurPattern) + '  ' 
-                      + str(Stage.BOSS.conindex), Sys.COLORDIC['BLUE'], 30, 30)
+        Sys.InputText(Sys.SMALLFONT, str(Stage.BOSS.isNormal) + '  ' 
+                      + str(Stage.BOSS.LCElapsed) + '  ' 
+                      + str(Stage.BOSS.CoolElapsed) + '  ' 
+                      + str(Stage.BOSS.CurPattern), Sys.COLORDIC['BLUE'], 30, 30)
         pygame.display.update()
         Sys.FPSCLOCK.tick(Sys.FPS)
 
