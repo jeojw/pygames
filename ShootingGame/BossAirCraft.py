@@ -19,10 +19,10 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
         self.isChangeCondition = False
         self.ChangePattern = False
 
-        self.isLaser = False
-        self.readyLaser = False
         self.OpenLaser = False
         self.LCoolOff = False
+
+        self.OpenSpin = False
 
         self.isNormal = False
 
@@ -56,13 +56,13 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
         
         self.LaserTime = 4
         self.LaserStart = 0
-        self.LaserElapsed = 0.1
+        self.LaserElapsed = 0
         
         self.NormalTime = 2
         self.NormalStart = 0
         self.NormalElapsed = 0
         
-        self.SpinTime = 2
+        self.SpinTime = 3.5
         self.SpinStart = 0
         self.SpinElapsed = 0
         
@@ -89,14 +89,31 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
         if (not self.OpenLaser):
             self.LaserStart = pygame.time.get_ticks()
             self.OpenLaser = True
-        self.isLaser = True
 
         if (self.index == len(self.SpriteList[self.conindex]) - 1):
             self.SetBullets('LASER')
-            self.readyLaser = True
+            self.LaserElapsed = (pygame.time.get_ticks() - self.LaserStart) / 1000
+            if (self.LaserElapsed != 0):
+                self.LCStart = pygame.time.get_ticks()
+            if (self.LaserElapsed >= self.LaserTime):
+                self.LaserElapsed = 0 ## 여기에서 openlaser를 거짓으로 처리하면 평생 거짓이 됨...
+                self.LaserStart = 0
+                self.CurPattern = 'LASEROFF'
             
     def pattern_2(self):
-        pass
+        if (not self.OpenSpin):
+            self.SpinStart = pygame.time.get_ticks()
+            self.OpenSpin = True
+
+        if (self.index == len(self.SpriteList[self.conindex]) - 1):
+            self.SetBullets('SPINBULLET')
+            self.SpinElapsed = (pygame.time.get_ticks() - self.SpinStart) / 1000
+            if (self.SpinElapsed != 0):
+                self.SCStart = pygame.time.get_ticks()
+            if (self.SpinElapsed > self.SpinTime):
+                self.SpinElapsed = 0
+                self.SpinStart = 0
+                self.CurPattern = 'SPINOFF'
         
     def pattern_3(self):
         pass
@@ -123,35 +140,46 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
         
         elif (self.CurPattern == 'LASER'):
             self.pattern_1()
-            self.LaserElapsed = (pygame.time.get_ticks() - self.LaserStart) / 1000
-            if (self.LaserElapsed >= self.LaserTime):
-                self.LaserElapsed = 0 ## 여기에서 openlaser를 거짓으로 처리하면 평생 거짓이 됨...
-                self.LaserStart = 0
-                self.OpenLaser = False
-                self.CurPattern = 'NORMAL' #코드 자체가 꼬인거 같은데..... 모르겠다 어떻게 바꿔야 할 지...
-                self.UpdatePattern()
 
-            if (self.LaserElapsed != 0):
-                self.LCStart = pygame.time.get_ticks()
+        elif (self.CurPattern == 'LASEROFF'):
+            self.OpenLaser = False
+            if (self.index == 0):
+                self.CurPattern = 'NORMAL'
+                self.UpdatePattern()
                 
         elif (self.CurPattern == 'SPINBULLET'):
-            pass
+            self.pattern_2()
+
+        elif (self.CurPattern == 'SPINOFF'):
+            self.OpenSpin = False
+            if (self.index == 0):
+                self.CurPattern = 'NORMAL'
+                self.UpdatePattern()
             
         elif (self.CurPattern == 'TBD'):
             pass
         
         if (self.CurPattern != 'LASER'):
-            self.isChangeCondition = True
-            self.StartCool = pygame.time.get_ticks()
             self.CoolUpdate('LASER')
+
+        if (self.CurPattern != 'SPINBULLET'):
+            self.CoolUpdate('SPINBULLET')
 
     def CoolUpdate(self, Type):
         if (Type == 'LASER'):
             self.LCElapsed = (pygame.time.get_ticks() - self.LCStart) / 1000
             if (self.LCElapsed >= self.LaserCool):
-                self.LCoolOff = True
                 self.LCElapsed = 0
                 self.LCStart = 0
+            if (self.LCElapsed == 0):
+                self.LCoolOff = True
+                self.LCElapsed = 0.01
+
+        elif (Type == 'SPINBULLET'):
+            self.SCElapsed = (pygame.time.get_ticks() - self.SCStart) / 1000
+            if (self.SCElapsed >= self.SpinCool):
+                self.SCElapsed = 0
+                self.SCStart = 0
         
     def UpdatePattern(self):
         '''
@@ -166,17 +194,15 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
         
         self.CoolElapsed = (pygame.time.get_ticks() - self.CoolStart) / 1000
         if (self.CoolElapsed > self.PatternCool):
-            if (not self.PatternQueue.isEmpty()):
-                self.NextPattern = self.PatternQueue.dequeue()
+            if (self.CurPattern == 'NORMAL'):
+                if (not self.PatternQueue.isEmpty()):
+                    self.NextPattern = self.PatternQueue.dequeue()
             self.ChangePattern = True
             self.CoolElapsed = 0
             self.CoolStart = 0
 
         if (self.LCoolOff):
-            if (self.CurPattern == 'NORMAL'):
-                self.CurPattern = 'LASER'
-            else:
-                self.PatternQueue.enqueue('LASER')
+            self.PatternQueue.enqueue('LASER')
             self.LCoolOff = False
 
     def UpdateCycle(self):
@@ -230,7 +256,8 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
         if (self.CurPattern == 'NORMAL'):
             self.conindex = 0
             self.UpdateCycle()
-        elif (self.CurPattern == 'LASER'):
+        elif (self.CurPattern == 'LASER' or 
+              self.CurPattern == 'LASEROFF'):
             self.conindex = 1
             self.UpdateCycle()
         elif (self.CurPattern == 'SPINBULLET'):
@@ -244,16 +271,14 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
             self.current_time = 0
 
             if (self.CurPattern == 'LASER'):
-                if (self.OpenLaser):
-                    self.index += 1
-                    if (self.index >= len(self.SpriteList[self.conindex])):
-                        self.index = len(self.SpriteList[self.conindex]) - 1
-                        
-                else:
-                    self.index -= 1
-                    if (self.index <= 0):
-                        self.index = 0
-                        self.isLaser = False
+                self.index += 1
+                if (self.index >= len(self.SpriteList[self.conindex])):
+                    self.index = len(self.SpriteList[self.conindex]) - 1
+
+            elif (self.CurPattern == 'LASEROFF'):
+                self.index -= 1
+                if (self.index <= 0):
+                    self.index = 0
 
             else:
                 self.index += 1
