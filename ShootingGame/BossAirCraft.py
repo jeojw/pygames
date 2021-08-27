@@ -3,6 +3,7 @@ import EnemyAirCraft
 import Queue
 import HitBox
 import Bullet
+import timeit
 
 Boss = pygame.image.load('ShootingGame/Sprite/Boss/Boss_Sprite.png')
 BossLaser = [pygame.image.load('ShootingGame/Sprite/Boss/Boss_Laser_' + str(i) + '.png') for i in range(1, 7)]
@@ -159,7 +160,7 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
         elif (self.CurPattern == 'TBD'):
             pass
         
-        if (self.CurPattern != 'LASER'):
+        if (self.CurPattern != 'LASER' and not self.LCoolOff):
             self.CoolUpdate('LASER')
 
         if (self.CurPattern != 'SPINBULLET'):
@@ -173,7 +174,6 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
                 self.LCStart = 0
             if (self.LCElapsed == 0):
                 self.LCoolOff = True
-                self.LCElapsed = 0.01
 
         elif (Type == 'SPINBULLET'):
             self.SCElapsed = (pygame.time.get_ticks() - self.SCStart) / 1000
@@ -203,7 +203,6 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
 
         if (self.LCoolOff):
             self.PatternQueue.enqueue('LASER')
-            self.LCoolOff = False
 
     def UpdateCycle(self):
         self.ElapsedChange = (pygame.time.get_ticks() - self.StartChange) / 1000
