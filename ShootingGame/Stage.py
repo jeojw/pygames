@@ -1,9 +1,17 @@
+import pygame
 import Camera
 import System
 import Supply
 import PlayerAirCraft
 import EnemyAirCraft
 import BossAirCraft
+
+class SpriteSort(pygame.sprite.Group):
+    def __init__(self):
+        pass
+    
+    def draw(self):
+        pass
 
 class Stage(System.System):
     def __init__(self, Level, Score):
@@ -22,10 +30,35 @@ class Stage(System.System):
         
     def SetStage(self, level):
         self.PLAYER = PlayerAirCraft.PlayerAirCraft(360, 700)
-        self.BOSS = BossAirCraft.BossAirCraft(1000000, 3000, 10, 100)
+        self.BOSS = BossAirCraft.BossAirCraft(1000000, 3000, 0, 0)
+        
+    def OpeningScreen(self):
+        pass
+    
+    def GameOverScreen(self):
+        pass
+    
+    def ShowScoreScreen(self):
+        pass
 
     def Draw(self):
-        pass
+        self.DrawObject()
+    
+    def DrawObject(self):
+        for enemy in self.EnemyList:
+            enemy.Draw()
+            
+        self.BOSS.Draw()
+        
+        for bullet in self.PLAYER.ProjectileList:
+            bullet.Draw()
+            
+        for enemy in self.EnemyList:
+            for bullet in enemy.ProjectileList:
+                bullet.Draw()
+    
+        for bullet in self.BOSS.ProjectileList:
+            bullet.Draw()
         
     def UpdateBullets(self):
         for bullet in self.PLAYER.ProjectileList:
@@ -35,29 +68,37 @@ class Stage(System.System):
                 if (enemy.HitBox.CheckCollision(bullet.HitBox)):
                     self.PLAYER.ProjectileList.remove(bullet)
             bullet.Update()
-            bullet.Draw()
             
         for enemy in self.EnemyList:
             for bullet in enemy.ProjectileList:
+                if (bullet.GetPos('y') >= self.LIMITSIZE.y or 
+                    bullet.GetPos('x') <= 0 or
+                    bullet.GetPos('x') + bullet.HitBox.GetSize('w') >= self.LIMITSIZE.x):
+                    enemy.ProjectileList.remove(bullet)
                 if (self.PLAYER.HitBox.CheckCollision(bullet.HitBox)):
                     enemy.ProjectileList.remove(bullet)
                 bullet.Update()
-                bullet.Draw()
                 
             if (enemy.removeable):
                 self.EnemyList.remove(enemy)
         
-        for bullet in self.BOSS.ProjectileList:
-            if (self.PLAYER.HitBox.CheckCollision(bullet.HitBox)):
-                enemy.ProjectileList.remove(bullet)
-            bullet.Update()
-            bullet.Draw()
-            
-        if (self.BOSS.removeable):
-            del self.BOSS
+        if (self.BOSS.CurPattern != 'LASER'):
+            for bullet in self.BOSS.ProjectileList:
+                if (bullet.GetPos('y') >= self.LIMITSIZE.y or 
+                    bullet.GetPos('x') <= 0 or
+                    bullet.GetPos('x') + bullet.HitBox.GetSize('w') >= self.LIMITSIZE.x):
+                    self.BOSS.ProjectileList.remove(bullet)
+                if (self.PLAYER.HitBox.CheckCollision(bullet.HitBox)):
+                    self.BOSS.ProjectileList.remove(bullet)
+                bullet.Update()
+        
+        else:
+            for bullet in self.BOSS.ProjectileList:
+                bullet.Update()
     
     def UpdateScore(self):
-        pass
+        self.InputText(self.BIGFONT, 'Score: ', self.COLORDIC['BLACK'], 720, 20)
+        self.InputText(self.BIGFONT, str(self.TotalScore), self.COLORDIC['BLACK'], 880, 20)
     
     def UpdateItem(self):
         for item in self.ItemList:
@@ -71,10 +112,11 @@ class Stage(System.System):
     def UpdateEnemy(self, dt):
         for enemy in self.EnemyList:
             enemy.Update(self.PLAYER)
-            enemy.Draw()
         
         self.BOSS.Update(self.PLAYER, dt * 50)
-        self.BOSS.Draw()
+        
+        if (self.BOSS.removeable):
+            del self.BOSS
     
     def Update(self, dt):
         self.UpdateBullets()

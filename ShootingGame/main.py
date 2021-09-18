@@ -51,7 +51,7 @@ def rungame(Sys, Stage):
                       + str(Stage.BOSS.LaserElapsed) + '  ' 
                       + str(Stage.BOSS.LaserStart) + '  '
                       + str(Stage.BOSS.PatternQueue.size()) + '  '
-                      + str(Stage.BOSS.CurPattern), Sys.COLORDIC['BLUE'], 30, 30)
+                      + str(Stage.BOSS.SpinPos), Sys.COLORDIC['BLUE'], 30, 30)
         pygame.display.update()
         Sys.FPSCLOCK.tick(Sys.FPS)
 

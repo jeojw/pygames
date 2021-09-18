@@ -3,18 +3,19 @@ import HitBox
 import System
 
 class Bullet(System.System):
-    def __init__(self, Sprite, x_pos, y_pos, ATK, angle=None):
+    def __init__(self, Sprite, x_pos, y_pos, ATK, SPEED ,angle=None):
         super().__init__()
         self.sprite = Sprite
         self.pos = pygame.math.Vector2(x_pos, y_pos)
         self.angle = angle
-        self.VEL = pygame.math.Vector2(0, 10)
+        self.VEL = pygame.math.Vector2(0, SPEED)
         if (self.angle is not None):
             self.sprite = pygame.transform.rotate(self.sprite, self.angle)
             self.VEL = self.VEL.rotate(-self.angle)
-        self.HitBox = HitBox.HitBox(self.sprite, x_pos, y_pos)
-
+        self.pos.x -= self.sprite.get_width() / 2
+        self.HitBox = HitBox.HitBox(self.sprite, self.pos.x, self.pos.y)
         self.ATK = ATK
+        
         
     def GetPos(self, t):
         try:

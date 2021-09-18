@@ -85,7 +85,11 @@ class EnemyAirCraft(AirCraft.AirCraft):
             if (self.HitBox.CheckCollision(bullet.HitBox)):
                 self.HP -= (bullet.ATK - self.DEF)
     
-    def UpdateCondition(self):
+    def UpdateCondition(self, Player):
+        y_distance = abs(self.GetPos('y', True) - Player.GetPos('y', True))
+        if (y_distance <= 600):
+            self.isDetect = True
+        
         if (self.isAttack and not self.isDead and self.isDetect):
             self.SetBullets()
             self.isAttack = False
@@ -109,19 +113,17 @@ class EnemyAirCraft(AirCraft.AirCraft):
             if (self.ElapsedExist > self.ExistTime):
                 self.removeable = True
         
-    def UpdatePos(self, Player):
+    def UpdatePos(self):
         super().UpdatePos()
-        
-        y_distance = abs(self.GetPos('y', True) - Player.GetPos('y', True))
+
         if (self.pos.x < 0):
             self.pos.x = 0
         elif (self.pos.x + self.HitBox.GetSize('w') > self.LIMITSIZE.x):
             self.pos.x = self.LIMITSIZE.x - self.HitBox.GetSize('w')
             
-        if (y_distance > 600 and not self.isDetect):
+        if (not self.isDetect):
             self.pos -= self.VEL * 1.5
         else:
-            self.isDetect = True
             self.Static()
             
         self.HitBox.UpdatePos(self.pos.x, self.pos.y)
@@ -138,6 +140,6 @@ class EnemyAirCraft(AirCraft.AirCraft):
         
     def Update(self, Player):
         self.UpdateStat(Player)
-        self.UpdateCondition()
-        self.UpdatePos(Player)
+        self.UpdateCondition(Player)
+        self.UpdatePos()
         self.UpdateSprite()

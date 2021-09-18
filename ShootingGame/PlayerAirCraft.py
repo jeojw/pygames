@@ -14,7 +14,7 @@ explode = pygame.image.load('ShootingGame/Sprite/explode_effect.png')
 class PlayerAirCraft(AirCraft.AirCraft):
     def __init__(self, x_pos, y_pos):
         super().__init__(x_pos, y_pos)
-        self.HEARTS = 400
+        self.HEARTS = 4
         self.ATK = 100 # 공격력
         self.DEF = 20 # 방어력
         self.ATKCOUNTS = 2 # 발사되는 투사체 개수
@@ -45,7 +45,7 @@ class PlayerAirCraft(AirCraft.AirCraft):
         
         self.BulletInterval = 7
         self.BulletAngle = 10
-        self.AtkCool = 0.1
+        self.AtkCool = 0.2
         self.StartCool = 0
         self.ElapsedCool = 0
         
@@ -79,7 +79,7 @@ class PlayerAirCraft(AirCraft.AirCraft):
         
     def DrawStat(self):
         for i in range(self.HEARTS):
-            pygame.draw.circle(self.GAMESCREEN, (255, 0, 0), [20 + i * 50, 40], 20)
+            pygame.draw.circle(self.GAMESCREEN, (255, 0, 0), [740 + i * 50, 150], 20)
     
     def Draw(self):
         self.DrawPos()
@@ -119,11 +119,8 @@ class PlayerAirCraft(AirCraft.AirCraft):
             self.isAttack = True
             self.ElapsedCool = 0
             self.StartCool = 0
-            
-        if (self.ElapsedCool > self.AtkCool):
-            self.ElapsedCool = 0
         '''
-            
+
         for enemy in Stage.EnemyList:
             for bullet in enemy.ProjectileList:
                 if (self.HitBox.CheckCollision(bullet.HitBox)):
@@ -132,6 +129,14 @@ class PlayerAirCraft(AirCraft.AirCraft):
                     self.BulletStack.pop()
                     self.HitBox.Collidable = False
                     self.StartInvincible = pygame.time.get_ticks()
+                    
+        for bullet in Stage.BOSS.ProjectileList:
+            if (self.HitBox.CheckCollision(bullet.HitBox)):
+                self.HEARTS -= 1
+                self.Condition = 'Invincible'
+                self.BulletStack.pop()
+                self.HitBox.Collidable = False
+                self.StartInvincible = pygame.time.get_ticks()
 
         if (not self.HitBox.Collidable):
             self.ElapsedInvincible = (pygame.time.get_ticks() - self.StartInvincible) / 1000
@@ -180,6 +185,7 @@ class PlayerAirCraft(AirCraft.AirCraft):
         if (self.isDead):
             self.index = len(self.SpriteList) - 1
         
+        self.HitBox.Draw()
         self.HitBox.UpdateSize(self.SpriteList[self.index])
     
     def Update(self, Stage):
