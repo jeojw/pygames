@@ -200,6 +200,7 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
             self.pattern_1()
 
         elif (self.CurPattern == 'LASEROFF'):
+            self.LaserSprite.clear()
             self.OpenLaser = False
             if (self.index == 0):
                 self.CurPattern = 'NORMAL'
@@ -314,6 +315,8 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
             if (self.CurPattern == 'NORMAL'):
                 self.movevariable += 0.05
                 self.pos = self.EightMovement(self.movevariable)
+                self.SpinPos.x = self.pos.x + 300
+                self.SpinPos.y = self.pos.y + 105
             else:
                 self.Static()
             
