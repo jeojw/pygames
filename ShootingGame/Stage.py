@@ -56,7 +56,11 @@ class Stage(System.System):
         for enemy in self.EnemyList:
             for bullet in enemy.ProjectileList:
                 bullet.Draw()
-    
+        
+        if (self.BOSS.CurPattern == 'LASER'):
+            for laser in self.BOSS.LaserSprite:
+                laser.Draw()
+        
         for bullet in self.BOSS.ProjectileList:
             bullet.Draw()
         
@@ -82,19 +86,18 @@ class Stage(System.System):
             if (enemy.removeable):
                 self.EnemyList.remove(enemy)
         
-        if (self.BOSS.CurPattern != 'LASER'):
-            for bullet in self.BOSS.ProjectileList:
-                if (bullet.GetPos('y') >= self.LIMITSIZE.y or 
-                    bullet.GetPos('x') <= 0 or
-                    bullet.GetPos('x') + bullet.HitBox.GetSize('w') >= self.LIMITSIZE.x):
-                    self.BOSS.ProjectileList.remove(bullet)
-                if (self.PLAYER.HitBox.CheckCollision(bullet.HitBox)):
-                    self.BOSS.ProjectileList.remove(bullet)
-                bullet.Update()
+        for bullet in self.BOSS.ProjectileList:
+            if (bullet.GetPos('y') >= self.LIMITSIZE.y or 
+                bullet.GetPos('x') <= 0 or
+                bullet.GetPos('x') + bullet.HitBox.GetSize('w') >= self.LIMITSIZE.x):
+                self.BOSS.ProjectileList.remove(bullet)
+            if (self.PLAYER.HitBox.CheckCollision(bullet.HitBox)):
+                self.BOSS.ProjectileList.remove(bullet)
+            bullet.Update()
         
-        else:
-            for bullet in self.BOSS.ProjectileList:
-                bullet.Update()
+        if (self.BOSS.CurPattern == 'LASER'):
+            for laser in self.BOSS.LaserSprite:
+                laser.Update()
     
     def UpdateScore(self):
         self.InputText(self.BIGFONT, 'Score: ', self.COLORDIC['BLACK'], 720, 20)

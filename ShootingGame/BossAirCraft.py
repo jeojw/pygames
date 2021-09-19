@@ -20,23 +20,25 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
     def __init__(self, MAXHP, ATK, DEF, y_pos):
         self.initx = 50
         super().__init__(MAXHP, ATK, DEF, self.initx, y_pos)
-        self.SpinPos = pygame.math.Vector2(self.pos.x + 300, self.pos.y + 110)
+        self.SpinPos = pygame.math.Vector2(self.pos.x + 300, self.pos.y + 105)
         self.movevariable = 0
 
         self.isExist = False
         self.isChangeCondition = False
         self.ChangePattern = False
-
+        
+        self.isNormal = False
+        
+        self.LaserSprite = []
         self.OpenLaser = False
         self.isLaser = False
         self.LCoolOff = False
 
         self.OpenSpin = False
-
-        self.isNormal = False
         self.isSpin = False
         self.SpinQueue = Queue.Queue()
         self.SpinAngle = 0
+        self.SCoolOff = False
 
         self.conindex = 0
         self.index = 0
@@ -108,7 +110,7 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
             self.ProjectileList.append(Bullet.Bullet(normalbullet, self.HitBox.GetPos('x', True) + self.BulletIntervalx * 2 , self.HitBox.GetPos('y') + self.HitBox.GetSize('h') - self.BulletIntervaly * 1.5, self.ATK, 10, 180))
         
         elif (Type == 'LASER'):
-            self.ProjectileList = [Bullet.Bullet(pygame.transform.scale(laser, (27, 1000)), self.HitBox.GetPos('x', True) - 2, self.HitBox.GetPos('y') + self.HitBox.GetSize('h') + 36, self.ATK, 0, 180),
+            self.LaserSprite = [Bullet.Bullet(pygame.transform.scale(laser, (27, 1000)), self.HitBox.GetPos('x', True) - 2, self.HitBox.GetPos('y') + self.HitBox.GetSize('h') + 36, self.ATK, 0, 180),
                                   Bullet.Bullet(pygame.transform.scale(laser, (20, 1000)), self.HitBox.GetPos('x', True) - 135, self.HitBox.GetPos('y') + self.HitBox.GetSize('h'), self.ATK, 0, 180),
                                   Bullet.Bullet(pygame.transform.scale(laser, (20, 1000)), self.HitBox.GetPos('x', True) + 135, self.HitBox.GetPos('y') + self.HitBox.GetSize('h'), self.ATK, 0, 180),
                                   Bullet.Bullet(pygame.transform.scale(laser, (20, 1000)), self.HitBox.GetPos('x', True) - 237, self.HitBox.GetPos('y') + self.HitBox.GetSize('h') - 31, self.ATK, 0, 180),
@@ -172,17 +174,17 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
             self.InitStart = pygame.time.get_ticks()
             self.isDetect = False
             self.ChangePattern = False ## *** 추구 지켜봐야할 코드
-        
+        '''
         
         if (self.ChangePattern):
             if (self.NextPattern is not None):
                 self.CurPattern = self.NextPattern
             self.CoolStart = pygame.time.get_ticks()
             self.ChangePattern = False
-        '''
 
         if (self.CurPattern == 'NORMAL'):
             if (self.isNormal):
+                self.isMove = True
                 self.SetBullets('NORMAL')
                 self.isNormal = False
                 self.NormalStart = pygame.time.get_ticks()
@@ -198,7 +200,6 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
             self.pattern_1()
 
         elif (self.CurPattern == 'LASEROFF'):
-            self.ProjectileList.clear()
             self.OpenLaser = False
             if (self.index == 0):
                 self.CurPattern = 'NORMAL'
@@ -236,6 +237,8 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
             if (self.SCElapsed >= self.SpinCool):
                 self.SCElapsed = 0
                 self.SCStart = 0
+            if (self.SCElapsed == 0):
+                self.SCoolOff = True
     
     def UpdatePattern(self):
         '''
@@ -259,6 +262,9 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
 
         if (self.LCoolOff):
             self.PatternQueue.enqueue('LASER')
+            
+        if (self.SCoolOff):
+            self.PatternQueue.enqueue('SPINBULLET')
 
     def UpdateCycle(self):
         self.ElapsedChange = (pygame.time.get_ticks() - self.StartChange) / 1000
@@ -310,9 +316,6 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
                 self.pos = self.EightMovement(self.movevariable)
             else:
                 self.Static()
-                
-        if (self.isMove):
-            self.SpinPos += self.pos
             
         self.HitBox.UpdatePos(self.pos.x, self.pos.y)
         

@@ -46,7 +46,7 @@ def rungame(Sys, Stage):
         Stage.Update(dt)
         Stage.Draw()
         
-        Sys.InputText(Sys.SMALLFONT, str(Stage.BOSS.LCElapsed) + '  ' 
+        Sys.InputText(Sys.SMALLFONT, str(Stage.BOSS.SCElapsed) + '  ' 
                       + str(Stage.BOSS.CoolElapsed) + '  ' 
                       + str(Stage.BOSS.LaserElapsed) + '  ' 
                       + str(Stage.BOSS.LaserStart) + '  '
