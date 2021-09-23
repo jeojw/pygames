@@ -47,6 +47,6 @@ class AirCraft(System.System):
         
     def UpdatePos(self):
         before = self.SizeQueue.dequeue()
-        diffPos = pygame.math.Vector2(abs(self.HitBox.GetSize('w') - before[0]), abs(self.HitBox.GetSize('h') - before[1]))
+        diffPos = pygame.math.Vector2(abs(self.SpriteList[self.index].get_width() - before[0]), abs(self.SpriteList[self.index].get_height() - before[1]))
         self.pos -= diffPos
-        self.SizeQueue.enqueue((self.HitBox.GetSize('w'), self.HitBox.GetSize('h')))
+        self.SizeQueue.enqueue(self.SpriteList[self.index].get_size())

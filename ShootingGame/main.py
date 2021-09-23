@@ -41,17 +41,17 @@ def rungame(Sys, Stage):
                     event.key == pygame.K_DOWN):
                     Stage.PLAYER.Static()
                     
-        Stage.PLAYER.Update(Stage)
-        Stage.PLAYER.Draw()
         Stage.Update(dt)
         Stage.Draw()
+        Stage.PLAYER.Update(Stage)
+        Stage.PLAYER.Draw()
         
         Sys.InputText(Sys.SMALLFONT, str(Stage.BOSS.SCElapsed) + '  ' 
                       + str(Stage.BOSS.CoolElapsed) + '  ' 
                       + str(Stage.BOSS.LaserElapsed) + '  ' 
-                      + str(Stage.BOSS.LaserStart) + '  '
+                      + str(Stage.PLAYER.pos) + '  '
                       + str(Stage.BOSS.PatternQueue.size()) + '  '
-                      + str(Stage.BOSS.SpinPos), Sys.COLORDIC['BLUE'], 30, 30)
+                      + str(Stage.PLAYER.index), Sys.COLORDIC['BLUE'], 30, 30)
         pygame.display.update()
         Sys.FPSCLOCK.tick(Sys.FPS)
 

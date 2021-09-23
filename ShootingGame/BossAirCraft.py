@@ -69,7 +69,7 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
         self.SCStart = 0
         self.SCElapsed = 0
         
-        self.LaserTime = 4
+        self.LaserTime = 3.3
         self.LaserStart = 0
         self.LaserElapsed = 0
         
@@ -86,7 +86,7 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
         self.current_time = 0
         self.animation_time = round(100 / len(self.SpriteList[self.conindex] * 100), 2)
         
-        self.NormalDelay = 0.7
+        self.NormalDelay = 0.9
         self.StartNormal = 0
         self.ElapsedNormal = 0
         
@@ -174,13 +174,14 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
             self.InitStart = pygame.time.get_ticks()
             self.isDetect = False
             self.ChangePattern = False ## *** 추구 지켜봐야할 코드
-        '''
+        
         
         if (self.ChangePattern):
             if (self.NextPattern is not None):
                 self.CurPattern = self.NextPattern
             self.CoolStart = pygame.time.get_ticks()
             self.ChangePattern = False
+        '''
 
         if (self.CurPattern == 'NORMAL'):
             if (self.isNormal):
@@ -371,7 +372,9 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
                     self.index = 0
         
     def Update(self, Player, dt):
+        
         self.PatternCycle()
+        
         self.UpdateStat(Player)
         self.UpdateCondition(Player)
         self.UpdatePos()

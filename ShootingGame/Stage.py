@@ -6,13 +6,6 @@ import PlayerAirCraft
 import EnemyAirCraft
 import BossAirCraft
 
-class SpriteSort(pygame.sprite.Group):
-    def __init__(self):
-        pass
-    
-    def draw(self):
-        pass
-
 class Stage(System.System):
     def __init__(self, Level, Score):
         super().__init__()
@@ -24,6 +17,7 @@ class Stage(System.System):
         self.BOSS = None
         self.EnemyList = []
         self.ItemList = []
+        self.SupplyType = None
         
         self.StageScore = 0
         self.TotalScore = 0
@@ -31,7 +25,9 @@ class Stage(System.System):
     def SetStage(self, level):
         self.PLAYER = PlayerAirCraft.PlayerAirCraft(360, 700)
         self.BOSS = BossAirCraft.BossAirCraft(1000000, 3000, 0, 0)
-        
+        self.ItemList.append(Supply.Supply('ATK', 200, 100))
+        self.ItemList.append(Supply.Supply('ATK', 200, 200))
+        self.ItemList.append(Supply.Supply('ATK', 200, 300))
     def OpeningScreen(self):
         pass
     
@@ -63,6 +59,9 @@ class Stage(System.System):
         
         for bullet in self.BOSS.ProjectileList:
             bullet.Draw()
+            
+        for item in self.ItemList:
+            item.Draw()
         
     def UpdateBullets(self):
         for bullet in self.PLAYER.ProjectileList:
@@ -105,12 +104,11 @@ class Stage(System.System):
     
     def UpdateItem(self):
         for item in self.ItemList:
-            '''
             if (item.HitBox.CheckCollision(self.PLAYER.HitBox)):
+                self.SupplyType = item.GetType()
                 self.ItemList.remove(item)
-            '''
+                
             item.Update()
-            item.Draw()
     
     def UpdateEnemy(self, dt):
         for enemy in self.EnemyList:

@@ -5,10 +5,12 @@ import Stack
 import Bullet
 import Camera
 
-samplesprite = pygame.image.load('ShootingGame/Sprite/AIRCRAFT_SAMPLE.png')
+samplesprite = pygame.image.load('ShootingGame/Sprite/sampleplayer.png')
 samplesprite2 = pygame.image.load('ShootingGame/Sprite/sample_sprite_2.png')
+samplesprite3 = pygame.image.load('ShootingGame/Sprite/sample_sprite_3.png')
 Invincible = pygame.image.load('ShootingGame/Sprite/Invincible_Sprite.png')
-bulletsprite = pygame.image.load('ShootingGame/Sprite/Bullet/Player_Bullet.png')
+bullet1 = pygame.image.load('ShootingGame/Sprite/Bullet/player_bullet_step_1.png')
+bullet2 = pygame.image.load('ShootingGame/Sprite/Bullet/player_bullet_step_2.png')
 explode = pygame.image.load('ShootingGame/Sprite/explode_effect.png')
 
 class PlayerAirCraft(AirCraft.AirCraft):
@@ -25,11 +27,12 @@ class PlayerAirCraft(AirCraft.AirCraft):
         self.isGetItem = False
         
         self.BulletStack = Stack.Stack()
-
         self.index = self.BulletStack.GetSize()
-        self.SpriteList = [samplesprite, samplesprite2, samplesprite2, samplesprite2, Invincible, explode]
+        self.bulletindex = 0
+        self.SpriteList = [samplesprite, samplesprite, samplesprite2, samplesprite3, Invincible, explode]
+        self.BulletSpriteL = [pygame.image.load('ShootingGame/Sprite/Bullet/player_bullet_step_' + str(i) + '.png') for i in range(1, 3)]
         self.HitBox = HitBox.HitBox(self.SpriteList[self.index], self.pos.x, self.pos.y)
-        self.SizeQueue.enqueue((self.HitBox.GetSize('w'), self.HitBox.GetSize('h')))
+        self.SizeQueue.enqueue(self.SpriteList[self.index].get_size())
         
         self.ChangeConditionTime = 2
         self.StartTime = 0
@@ -86,29 +89,32 @@ class PlayerAirCraft(AirCraft.AirCraft):
         self.DrawStat()
         
     def SetBullets(self, size):
-        self.ProjectileList.append(Bullet.Bullet(bulletsprite, self.HitBox.GetPos('x', True) - self.BulletInterval, self.HitBox.GetPos('y'), self.ATK))
-        self.ProjectileList.append(Bullet.Bullet(bulletsprite, self.HitBox.GetPos('x', True) + self.BulletInterval, self.HitBox.GetPos('y'), self.ATK))
-        if (size == 1):
-            self.ProjectileList.append(Bullet.Bullet(bulletsprite, self.HitBox.GetPos('x', True) - self.BulletInterval * 2, self.HitBox.GetPos('y'), self.ATK, self.BulletAngle))
-            self.ProjectileList.append(Bullet.Bullet(bulletsprite, self.HitBox.GetPos('x', True) + self.BulletInterval * 2, self.HitBox.GetPos('y'), self.ATK, -self.BulletAngle))
-        elif (size == 2):
-            pass
+        for i in range(-1, 2, 2):
+            self.ProjectileList.append(Bullet.Bullet(self.BulletSpriteL[self.bulletindex], self.HitBox.GetPos('x', True) - self.BulletInterval * i, self.HitBox.GetPos('y'), self.ATK, 10))
+    
+        if (size == 2):
+            for i in range(-1, 2, 2):
+                self.ProjectileList.append(Bullet.Bullet(self.BulletSpriteL[self.bulletindex], self.HitBox.GetPos('x', True) - self.BulletInterval * i * 2, self.HitBox.GetPos('y'), self.ATK, 10, self.BulletAngle * i))
         
         elif (size == 3):
             pass
         
     def UpdateStat(self, Stage):
-        for item in Stage.ItemList:
-            if (self.HitBox.CheckCollision(item.HitBox)):
-                if (item.GetType() == 'ATK'):
-                    if (self.BulletStack.GetSize() <= 3):
-                        self.BulletStack.push(item)
+        if (Stage.SupplyType == 'ATK'):
+            if (self.BulletStack.GetSize() <= 3):
+                self.BulletStack.push(True)
+                Stage.SupplyType = None
                         
-                elif (item.GetType() == 'HP'):
-                    pass
+        elif (Stage.SupplyType == 'HP'):
+            pass
+                
+        if (self.BulletStack.GetSize() == 0):
+            self.bulletindex = 0
+        elif (self.BulletStack.GetSize() >= 1):
+            self.bulletindex = 1
     
     def UpdateCondition(self, Stage):
-        '''
+        
         if (self.isAttack):
             self.SetBullets(self.BulletStack.GetSize())
             self.isAttack = False
@@ -119,7 +125,7 @@ class PlayerAirCraft(AirCraft.AirCraft):
             self.isAttack = True
             self.ElapsedCool = 0
             self.StartCool = 0
-        '''
+        
 
         for enemy in Stage.EnemyList:
             for bullet in enemy.ProjectileList:
@@ -173,9 +179,10 @@ class PlayerAirCraft(AirCraft.AirCraft):
             elif (self.direction == 'DOWN'):
                 self.pos.y += self.VEL.y
                 
-        self.HitBox.UpdatePos(self.pos.x, self.pos.y)
+        self.HitBox.UpdatePos(self.pos.x, self.pos.y, self.SpriteList[self.index])
             
     def UpdateSprite(self):
+        self.index = self.BulletStack.GetSize()
         if (self.Condition == 'Invincible'):
             if (self.ElapsedInvincible > self.InvincibleTime):
                 self.index = self.BulletStack.GetSize()
@@ -186,7 +193,9 @@ class PlayerAirCraft(AirCraft.AirCraft):
             self.index = len(self.SpriteList) - 1
         
         self.HitBox.Draw()
-        self.HitBox.UpdateSize(self.SpriteList[self.index])
+        if (self.BulletStack.GetSize() <= 2): # 스프라이트 이미지 크기를 통해 위치 재조정 할 예정(히트박스 크기 X!)
+            self.HitBox.UpdateSize(self.SpriteList[self.index])
+        
     
     def Update(self, Stage):
         self.UpdateStat(Stage)
