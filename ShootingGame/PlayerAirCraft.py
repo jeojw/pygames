@@ -5,7 +5,8 @@ import Stack
 import Bullet
 import Camera
 
-samplesprite = pygame.image.load('ShootingGame/Sprite/sampleplayer.png')
+tmpsprite = pygame.image.load('ShootingGame/Sprite/Player_Sprite.png')
+samplesprite = pygame.transform.scale(tmpsprite, (60, 60))
 samplesprite2 = pygame.image.load('ShootingGame/Sprite/sample_sprite_2.png')
 samplesprite3 = pygame.image.load('ShootingGame/Sprite/sample_sprite_3.png')
 Invincible = pygame.image.load('ShootingGame/Sprite/Invincible_Sprite.png')
@@ -115,7 +116,7 @@ class PlayerAirCraft(AirCraft.AirCraft):
     
     def UpdateCondition(self, Stage):
         
-        if (self.isAttack):
+        if (self.isAttack and not self.isDead):
             self.SetBullets(self.BulletStack.GetSize())
             self.isAttack = False
             self.StartCool = pygame.time.get_ticks()

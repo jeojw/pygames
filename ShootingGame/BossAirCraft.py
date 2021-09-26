@@ -118,7 +118,7 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
         
         elif (Type == 'SPINBULLET'):
             if (self.isSpin):
-                self.ProjectileList.append(Bullet.Bullet(pygame.transform.scale(spinbullet, (30, 30)), self.SpinPos.x, self.SpinPos.y , self.ATK, 2,  self.SpinAngle * 20))
+                self.ProjectileList.append(Bullet.Bullet(pygame.transform.scale(spinbullet, (30, 30)), self.SpinPos.x, self.SpinPos.y , self.ATK, 4,  self.SpinAngle * 12.5))
                 self.isSpin = False
                 self.StartSpin = pygame.time.get_ticks()
                     

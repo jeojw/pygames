@@ -51,8 +51,8 @@ def rungame(Sys, Stage):
                       + str(Stage.BOSS.LaserElapsed) + '  ' 
                       + str(Stage.PLAYER.pos) + '  '
                       + str(Stage.BOSS.PatternQueue.size()) + '  '
-                      + str(Stage.PLAYER.index), Sys.COLORDIC['BLUE'], 30, 30)
-        pygame.display.update()
+                      + str(Stage.PLAYER.HitBox.Collidable), Sys.COLORDIC['BLUE'], 30, 30)
+        pygame.display.flip()
         Sys.FPSCLOCK.tick(Sys.FPS)
 
 def main():
