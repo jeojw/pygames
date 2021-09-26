@@ -5,10 +5,7 @@ import Stack
 import Bullet
 import Camera
 
-tmpsprite = pygame.image.load('ShootingGame/Sprite/Player_Sprite.png')
-samplesprite = pygame.transform.scale(tmpsprite, (60, 60))
-samplesprite2 = pygame.image.load('ShootingGame/Sprite/sample_sprite_2.png')
-samplesprite3 = pygame.image.load('ShootingGame/Sprite/sample_sprite_3.png')
+tmplist = [pygame.image.load('ShootingGame/Sprite/Player_Sprite_' + str(i) + '.png') for i in range(1, 4)]
 Invincible = pygame.image.load('ShootingGame/Sprite/Invincible_Sprite.png')
 bullet1 = pygame.image.load('ShootingGame/Sprite/Bullet/player_bullet_step_1.png')
 bullet2 = pygame.image.load('ShootingGame/Sprite/Bullet/player_bullet_step_2.png')
@@ -30,7 +27,11 @@ class PlayerAirCraft(AirCraft.AirCraft):
         self.BulletStack = Stack.Stack()
         self.index = self.BulletStack.GetSize()
         self.bulletindex = 0
-        self.SpriteList = [samplesprite, samplesprite, samplesprite2, samplesprite3, Invincible, explode]
+        self.SpriteList = [pygame.transform.scale(tmplist[0], (60, 60)),
+                           pygame.transform.scale(tmplist[0], (60, 60)),
+                           pygame.transform.scale(tmplist[1], (60, 60)),
+                           pygame.transform.scale(tmplist[2], (84, 60)),
+                           Invincible, explode]
         self.BulletSpriteL = [pygame.image.load('ShootingGame/Sprite/Bullet/player_bullet_step_' + str(i) + '.png') for i in range(1, 3)]
         self.HitBox = HitBox.HitBox(self.SpriteList[self.index], self.pos.x, self.pos.y)
         self.SizeQueue.enqueue(self.SpriteList[self.index].get_size())
@@ -98,7 +99,10 @@ class PlayerAirCraft(AirCraft.AirCraft):
                 self.ProjectileList.append(Bullet.Bullet(self.BulletSpriteL[self.bulletindex], self.HitBox.GetPos('x', True) - self.BulletInterval * i * 2, self.HitBox.GetPos('y'), self.ATK, 10, self.BulletAngle * i))
         
         elif (size == 3):
-            pass
+            for i in range(-1, 2, 2):
+                self.ProjectileList.append(Bullet.Bullet(self.BulletSpriteL[self.bulletindex], self.HitBox.GetPos('x', True) - self.BulletInterval * i * 2, self.HitBox.GetPos('y'), self.ATK, 10, self.BulletAngle * i))
+            for i in range(-2, 3, 4):
+                self.ProjectileList.append(Bullet.Bullet(self.BulletSpriteL[self.bulletindex], self.HitBox.GetPos('x', True) - self.BulletInterval * i * 2.5, self.HitBox.GetPos('y'), self.ATK, 10))
         
     def UpdateStat(self, Stage):
         if (Stage.SupplyType == 'ATK'):
