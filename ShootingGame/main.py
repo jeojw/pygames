@@ -3,8 +3,6 @@ import sys
 import System
 import Stage
 
-sprite = pygame.image.load('ShootingGame/Sprite/AIRCRAFT_SAMPLE.png')
-
 def rungame(Sys, Stage):
     while True:
         dt = Sys.FPSCLOCK.tick(Sys.FPS) / 1000

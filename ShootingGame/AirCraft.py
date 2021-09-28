@@ -5,7 +5,7 @@ import HitBox
 '''
 비행체의 기초를 구현한 클래스
 '''
-samplesprite = pygame.image.load('ShootingGame/Sprite/AIRCRAFT_SAMPLE.png')
+samplesprite = pygame.image.load('ShootingGame/Sprite/Player_Sprite_1.png')
 
 class AirCraft(System.System):
     def __init__(self, x_pos, y_pos):

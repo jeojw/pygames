@@ -3,10 +3,10 @@ import AirCraft
 import HitBox
 import Bullet
 
-samplesprite = pygame.image.load('ShootingGame/Sprite/AIRCRAFT_SAMPLE.png')
+tmpsprite = pygame.image.load('ShootingGame/Sprite/Enemy/Enemy_Missile.png')
+samplesprite = pygame.transform.scale(tmpsprite, (90, 45))
 explode = pygame.image.load('ShootingGame/Sprite/explode_effect.png')
 bulletsprite = pygame.image.load('ShootingGame/Sprite/Bullet/Enemy_Bullet.png')
-flipsample = pygame.transform.flip(samplesprite, False, True)
 
 class EnemyAirCraft(AirCraft.AirCraft):
     def __init__(self, MAXHP, ATK, DEF, x_pos, y_pos):
@@ -21,7 +21,7 @@ class EnemyAirCraft(AirCraft.AirCraft):
         self.removeable = False
         
         self.index = 0
-        self.SpriteList = [flipsample, explode]
+        self.SpriteList = [samplesprite, explode]
         self.HitBox = HitBox.HitBox(self.SpriteList[self.index], self.pos.x, self.pos.y)
         self.SizeQueue.enqueue((self.HitBox.GetSize('w'), self.HitBox.GetSize('h')))
         
@@ -68,8 +68,7 @@ class EnemyAirCraft(AirCraft.AirCraft):
             return -1
         
     def SetBullets(self):
-        self.ProjectileList.append(Bullet.Bullet(bulletsprite, self.HitBox.GetPos('x', True) - self.BulletInterval, self.HitBox.GetPos('y'), self.ATK, 180))
-        self.ProjectileList.append(Bullet.Bullet(bulletsprite, self.HitBox.GetPos('x', True) + self.BulletInterval, self.HitBox.GetPos('y'), self.ATK, 180))
+        pass
         
     def DrawStat(self):
         Length = 125
@@ -143,3 +142,14 @@ class EnemyAirCraft(AirCraft.AirCraft):
         self.UpdateCondition(Player)
         self.UpdatePos()
         self.UpdateSprite()
+
+        
+missile = pygame.image.load('ShootingGame/Sprite/Bullet/Missile.png')
+
+class MissileEnemy(EnemyAirCraft):
+    def __init__(self, MAXHP, ATK, DEF, x_pos, y_pos):
+        super().__init__(MAXHP, ATK, DEF, x_pos, y_pos)
+        self.MissileReady = False
+    
+    def SetBullets(self):
+        self.ProjectileList = [Bullet.Bullet(missile, self.HitBox.GetPos('x', True), self.HitBox.GetPos('y') + self.HitBox.GetSize('h'), self.ATK, -10)]

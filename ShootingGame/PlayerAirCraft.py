@@ -119,7 +119,7 @@ class PlayerAirCraft(AirCraft.AirCraft):
             self.bulletindex = 1
     
     def UpdateCondition(self, Stage):
-        
+        '''
         if (self.isAttack and not self.isDead):
             self.SetBullets(self.BulletStack.GetSize())
             self.isAttack = False
@@ -130,7 +130,7 @@ class PlayerAirCraft(AirCraft.AirCraft):
             self.isAttack = True
             self.ElapsedCool = 0
             self.StartCool = 0
-        
+        '''        
 
         for enemy in Stage.EnemyList:
             for bullet in enemy.ProjectileList:
