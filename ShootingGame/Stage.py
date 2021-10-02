@@ -33,10 +33,8 @@ class Stage(System.System):
         '''
         self.PLAYER = PlayerAirCraft.PlayerAirCraft(360, 700)
         self.BOSS = BossAirCraft.BossAirCraft(10000, 10000, 10000, -999999999999)
-        self.EnemyList.append(EnemyAirCraft.MissileEnemy(1000, 10, 10, 300, 30))
-        self.ItemList.append(Supply.Supply('ATK', 200, 100))
-        self.ItemList.append(Supply.Supply('ATK', 200, 200))
-        self.ItemList.append(Supply.Supply('ATK', 200, 300))
+        self.EnemyList.append(EnemyAirCraft.MissileEnemy(1000, 10, 10, 30, -400))
+        
     def OpeningScreen(self):
         '''
         오프닝 화면

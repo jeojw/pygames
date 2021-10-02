@@ -2,8 +2,10 @@ import pygame
 import AirCraft
 import HitBox
 import Bullet
+import math
+import time
 
-tmpsprite = pygame.image.load('ShootingGame/Sprite/Enemy/Enemy_Missile.png')
+tmpsprite = pygame.image.load('ShootingGame/Sprite/Enemy/Enemy_Normal.png')
 samplesprite = pygame.transform.scale(tmpsprite, (90, 45))
 explode = pygame.image.load('ShootingGame/Sprite/explode_effect.png')
 bulletsprite = pygame.image.load('ShootingGame/Sprite/Bullet/Enemy_Bullet.png')
@@ -16,9 +18,13 @@ class EnemyAirCraft(AirCraft.AirCraft):
         self.ATK = ATK
         self.DEF = DEF
         self.VEL = pygame.math.Vector2(0, -6)
+        self.initpos = pygame.math.Vector2(x_pos, y_pos)
+        self.moveposy = 600
+        self.movesec = 0
         
         self.isDetect = False
         self.removeable = False
+        self.AttackCycle = False
         
         self.index = 0
         self.SpriteList = [samplesprite, explode]
@@ -32,12 +38,6 @@ class EnemyAirCraft(AirCraft.AirCraft):
         self.ExistTime = 0.2
         self.StartExist = pygame.time.get_ticks()
         self.ElapsedExist = 0
-        
-        self.BulletInterval = 7
-        self.BulletAngle = 10
-        self.AtkCool = 1
-        self.StartCool = 0
-        self.ElapsedCool = 0
 
     def GetPos(self, t, center=None):
         try:
@@ -79,26 +79,18 @@ class EnemyAirCraft(AirCraft.AirCraft):
             pygame.draw.rect(self.GAMESCREEN, self.COLORDIC['RED'], [self.HitBox.GetPos('x', True) - self.HitBox.GetSize('w'), self.HitBox.GetPos('y', True) + self.HitBox.GetSize('h') / 2,
                                                                  self.HP * convertCoefficient, 10])
         
+    def Movement(self, t):
+        pass
+        
     def UpdateStat(self, Player):
         for bullet in Player.ProjectileList:
             if (self.HitBox.CheckCollision(bullet.HitBox)):
                 self.HP -= (bullet.ATK - self.DEF)
     
-    def UpdateCondition(self, Player):
-        y_distance = abs(self.GetPos('y', True) - Player.GetPos('y', True))
-        if (y_distance <= 600):
+    def UpdateCondition(self):
+        if (self.pos.y >= self.initpos.y + self.moveposy):
             self.isDetect = True
-        
-        if (self.isAttack and not self.isDead and self.isDetect):
-            self.SetBullets()
-            self.isAttack = False
-            self.StartCool = pygame.time.get_ticks()
-        self.ElapsedCool = (pygame.time.get_ticks() - self.StartCool) / 1000
-        
-        if (self.ElapsedCool > self.AtkCool):
-            self.isAttack = True
-            self.ElapsedCool = 0
-            self.StartCool = 0
+            self.initpos.y = self.initpos.y + self.moveposy
             
         if (not self.isDead):
             self.StartExist = pygame.time.get_ticks()
@@ -119,13 +111,6 @@ class EnemyAirCraft(AirCraft.AirCraft):
             self.pos.x = 0
         elif (self.pos.x + self.HitBox.GetSize('w') > self.LIMITSIZE.x):
             self.pos.x = self.LIMITSIZE.x - self.HitBox.GetSize('w')
-            
-        if (not self.isDetect):
-            self.pos -= self.VEL * 1.5
-        else:
-            self.Static()
-            
-        self.HitBox.UpdatePos(self.pos.x, self.pos.y)
         
     def UpdateSprite(self):
         if (self.isDead):
@@ -139,17 +124,147 @@ class EnemyAirCraft(AirCraft.AirCraft):
         
     def Update(self, Player):
         self.UpdateStat(Player)
-        self.UpdateCondition(Player)
+        self.UpdateCondition()
         self.UpdatePos()
         self.UpdateSprite()
-
         
+        
+#-----------------------------------------------------------------------------------------------
+
+
+class NormalEnemy(EnemyAirCraft):
+    def __init__(self, MAXHP, ATK, DEF, x_pos, y_pos):
+        super().__init__(MAXHP, ATK, DEF, x_pos, y_pos)
+        self.SpriteList = [samplesprite, explode]
+        
+        self.AtkCool = 0.5
+        self.StartCool = 0
+        self.ElapsedCool = 0
+        
+    def SetBullets(self):
+        self.ProjectileList.append(Bullet.Bullet(bulletsprite, self.HitBox.GetPos('x', True) + 35, self.HitBox.GetPos('y') + self.HitBox.GetSize('h'), self.ATK, 10, 180))
+        self.ProjectileList.append(Bullet.Bullet(bulletsprite, self.HitBox.GetPos('x', True) - 30, self.HitBox.GetPos('y') + self.HitBox.GetSize('h'), self.ATK, 10, 180))
+        
+    def Movement(self, t):
+        if (t >= 0 and t < math.pi):
+            return pygame.math.Vector2(math.sin(t) * 240 + self.initpos.x, math.cos(t) * 10 + self.initpos.y)
+        elif (t >= math.pi and t <= 2 * math.pi):
+            return pygame.math.Vector2(math.sin(t) * 10 + self.initpos.x, math.cos(t) * 10 + self.initpos.y)
+        
+    def UpdatePos(self):
+        super().UpdatePos()
+        self.movesec += 0.1
+        if (self.movesec >= 2 * math.pi):
+            self.movesec = 0
+        
+        if (not self.isDetect):
+            self.pos -= self.VEL * 1.5
+        else:
+            self.pos = self.Movement(self.movesec)
+            
+        self.HitBox.UpdatePos(self.pos.x, self.pos.y)
+    
+    def UpdateCondition(self):
+        super().UpdateCondition()
+        
+        if (self.isAttack and not self.isDead and self.isDetect):
+            self.SetBullets()
+            self.atkcount += 1
+            self.isAttack = False
+            self.StartCool = pygame.time.get_ticks()
+        self.ElapsedCool = (pygame.time.get_ticks() - self.StartCool) / 1000
+        
+        if (self.ElapsedCool > self.AtkCool):
+            self.isAttack = True
+            self.ElapsedCool = 0
+            self.StartCool = 0
+            
+            
+#-----------------------------------------------------------------------------------------------
+
+            
 missile = pygame.image.load('ShootingGame/Sprite/Bullet/Missile.png')
+tmplist = [pygame.image.load('ShootingGame/Sprite/Enemy/Enemy_Missile.png'),
+           pygame.image.load('ShootingGame/Sprite/Enemy/Enemy_MissileOff.png')]
+spritelist = [pygame.transform.scale(s, (90, 45)) for s in tmplist]
 
 class MissileEnemy(EnemyAirCraft):
     def __init__(self, MAXHP, ATK, DEF, x_pos, y_pos):
         super().__init__(MAXHP, ATK, DEF, x_pos, y_pos)
-        self.MissileReady = False
+        self.SpriteList = spritelist + [explode]
+        
+        self.MissileReady = True
+        self.MissileShoot = False
+        self.missilemove = 0
+        self.missilecount = 0
+        
+        self.AtkCool = 1
+        self.StartCool = 0
+        self.ElapsedCool = 0
+        
+    def SetMissile(self):
+        if (self.missilecount < 2):
+            for i in range(-1, 2, 2):
+                self.ProjectileList.append(Bullet.Bullet(missile, self.HitBox.GetPos('x', True) + 30 * i, self.HitBox.GetPos('y') + self.HitBox.GetSize('h'), self.ATK, -self.MissileMovement(self.missilemove)))
+            self.missilecount += 2
+        else:
+            self.MissileReady = False
     
     def SetBullets(self):
-        self.ProjectileList = [Bullet.Bullet(missile, self.HitBox.GetPos('x', True), self.HitBox.GetPos('y') + self.HitBox.GetSize('h'), self.ATK, -10)]
+        self.ProjectileList.append(Bullet.Bullet(bulletsprite, self.HitBox.GetPos('x', True), self.HitBox.GetPos('y') + self.HitBox.GetSize('h'), self.ATK, 10, 180))
+        
+    def MissileMovement(self, t):
+        if (t <= 28 and t >= 0):
+            return t**0.5
+        elif (t > 28):
+            return (t - 24) ** 1.2
+        
+    def Movement(self, t):
+        if (t >= 0 and t < math.pi):
+            return pygame.math.Vector2(math.sin(t) * 240 + self.initpos.x, math.cos(t) * 10 + self.initpos.y)
+        elif (t >= math.pi and t <= 2 * math.pi):
+            return pygame.math.Vector2(math.sin(t) * 10 + self.initpos.x, math.cos(t) * 10 + self.initpos.y)
+        
+    def UpdatePos(self):
+        super().UpdatePos()
+        self.movesec += 0.1
+        if (self.movesec >= 2 * math.pi):
+            self.movesec = 0
+        
+        if (not self.isDetect):
+            self.pos -= self.VEL * 1.5
+        else:
+            if (self.MissileReady):
+                self.Static()
+            else:
+                self.pos = self.Movement(self.movesec)
+                self.missilemove += 1
+            
+        self.HitBox.UpdatePos(self.pos.x, self.pos.y)
+        
+    def UpdateCondition(self):
+        super().UpdateCondition()
+        
+        if (self.MissileReady and self.isDetect):
+            self.SetMissile()
+            
+        else:
+            if (self.isAttack and not self.isDead and self.isDetect):
+                self.SetBullets()
+                self.isAttack = False
+                self.StartCool = pygame.time.get_ticks()
+            self.ElapsedCool = (pygame.time.get_ticks() - self.StartCool) / 1000
+        
+            if (self.ElapsedCool > self.AtkCool):
+                self.isAttack = True
+                self.ElapsedCool = 0
+                self.StartCool = 0
+    
+    def UpdateSprite(self):
+        if (not self.MissileReady):
+            self.index = 1
+            
+        super().UpdateSprite()
+
+    def Update(self, Player):
+        super().Update(Player)

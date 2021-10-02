@@ -197,7 +197,6 @@ class PlayerAirCraft(AirCraft.AirCraft):
         if (self.isDead):
             self.index = len(self.SpriteList) - 1
         
-        self.HitBox.Draw()
         if (self.BulletStack.GetSize() <= 2): # 스프라이트 이미지 크기를 통해 위치 재조정 할 예정(히트박스 크기 X!)
             self.HitBox.UpdateSize(self.SpriteList[self.index])
         
