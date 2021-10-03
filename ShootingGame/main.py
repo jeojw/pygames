@@ -39,9 +39,9 @@ def rungame(Sys, Stage):
                     event.key == pygame.K_DOWN):
                     Stage.PLAYER.Static()
                     
-        Stage.Update(dt)
-        Stage.Draw()
+        Stage.Update(dt) # 순서에 따라 출력하는 결과가 다르다.. 왤까
         Stage.PLAYER.Update(Stage)
+        Stage.Draw()
         Stage.PLAYER.Draw()
         
         Sys.InputText(Sys.SMALLFONT, str(Stage.BOSS.SCElapsed) + '  ' 
@@ -49,7 +49,7 @@ def rungame(Sys, Stage):
                       + str(Stage.BOSS.LaserElapsed) + '  ' 
                       + str(Stage.PLAYER.pos) + '  '
                       + str('xx') + '  '
-                      + str(Stage.EnemyList[0].MissileReady), Sys.COLORDIC['BLUE'], 30, 30)
+                      + str(Stage.EnemyList[0].MissileShoot), Sys.COLORDIC['BLUE'], 30, 30)
         pygame.display.flip()
         Sys.FPSCLOCK.tick(Sys.FPS)
 

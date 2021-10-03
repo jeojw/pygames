@@ -7,8 +7,6 @@ import Camera
 
 tmplist = [pygame.image.load('ShootingGame/Sprite/Player_Sprite_' + str(i) + '.png') for i in range(1, 4)]
 Invincible = pygame.image.load('ShootingGame/Sprite/Invincible_Sprite.png')
-bullet1 = pygame.image.load('ShootingGame/Sprite/Bullet/player_bullet_step_1.png')
-bullet2 = pygame.image.load('ShootingGame/Sprite/Bullet/player_bullet_step_2.png')
 explode = pygame.image.load('ShootingGame/Sprite/explode_effect.png')
 
 class PlayerAirCraft(AirCraft.AirCraft):
@@ -130,7 +128,7 @@ class PlayerAirCraft(AirCraft.AirCraft):
             self.isAttack = True
             self.ElapsedCool = 0
             self.StartCool = 0
-        '''        
+        '''
 
         for enemy in Stage.EnemyList:
             for bullet in enemy.ProjectileList:

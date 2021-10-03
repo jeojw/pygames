@@ -11,8 +11,6 @@ Boss = pygame.image.load('ShootingGame/Sprite/Boss/Boss_Sprite.png')
 BossLaser = [pygame.image.load('ShootingGame/Sprite/Boss/Boss_Laser_' + str(i) + '.png') for i in range(1, 8)]
 BossSpinBullet = [pygame.image.load('ShootingGame/Sprite/Boss/Boss_Spin_' + str(i) + '.png') for i in range(1, 6)]
 laser = pygame.image.load('ShootingGame/Sprite/Bullet/laser.png')
-normalbullet = pygame.image.load('ShootingGame/Sprite/Bullet/Enemy_Bullet.png')
-spinbullet = pygame.image.load('ShootingGame/Sprite/Bullet/spinbullet.png')
 BossSprite = pygame.transform.scale(Boss, (600, 450))
 LaserSprite = pygame.transform.scale(laser, (30, 500))
 
@@ -47,6 +45,7 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
                            [pygame.transform.scale(sp, (600, 450)) for sp in BossSpinBullet], 
                            []
                           ]
+        self.spinbullet = pygame.image.load('ShootingGame/Sprite/Bullet/spinbullet.png')
         self.HitBox = HitBox.HitBox(BossSprite, self.pos.x, self.pos.y)
         self.SizeQueue.enqueue((self.HitBox.GetSize('w'), self.HitBox.GetSize('h')))
 
@@ -103,11 +102,11 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
         
     def SetBullets(self, Type):
         if (Type == 'NORMAL'):
-            self.ProjectileList.append(Bullet.Bullet(normalbullet, self.HitBox.GetPos('x', True), self.HitBox.GetPos('y') + self.HitBox.GetSize('h'), self.ATK, 10, 180))
-            self.ProjectileList.append(Bullet.Bullet(normalbullet, self.HitBox.GetPos('x', True) - self.BulletIntervalx, self.HitBox.GetPos('y') + self.HitBox.GetSize('h') - self.BulletIntervaly, self.ATK, 10, 180))
-            self.ProjectileList.append(Bullet.Bullet(normalbullet, self.HitBox.GetPos('x', True) - self.BulletIntervalx * 2 , self.HitBox.GetPos('y') + self.HitBox.GetSize('h') - self.BulletIntervaly * 1.5, self.ATK, 10, 180))
-            self.ProjectileList.append(Bullet.Bullet(normalbullet, self.HitBox.GetPos('x', True) + self.BulletIntervalx, self.HitBox.GetPos('y') + self.HitBox.GetSize('h') - self.BulletIntervaly, self.ATK, 10, 180))
-            self.ProjectileList.append(Bullet.Bullet(normalbullet, self.HitBox.GetPos('x', True) + self.BulletIntervalx * 2 , self.HitBox.GetPos('y') + self.HitBox.GetSize('h') - self.BulletIntervaly * 1.5, self.ATK, 10, 180))
+            self.ProjectileList.append(Bullet.Bullet(self.bullet, self.HitBox.GetPos('x', True), self.HitBox.GetPos('y') + self.HitBox.GetSize('h'), self.ATK, 10, 180))
+            self.ProjectileList.append(Bullet.Bullet(self.bullet, self.HitBox.GetPos('x', True) - self.BulletIntervalx, self.HitBox.GetPos('y') + self.HitBox.GetSize('h') - self.BulletIntervaly, self.ATK, 10, 180))
+            self.ProjectileList.append(Bullet.Bullet(self.bullet, self.HitBox.GetPos('x', True) - self.BulletIntervalx * 2 , self.HitBox.GetPos('y') + self.HitBox.GetSize('h') - self.BulletIntervaly * 1.5, self.ATK, 10, 180))
+            self.ProjectileList.append(Bullet.Bullet(self.bullet, self.HitBox.GetPos('x', True) + self.BulletIntervalx, self.HitBox.GetPos('y') + self.HitBox.GetSize('h') - self.BulletIntervaly, self.ATK, 10, 180))
+            self.ProjectileList.append(Bullet.Bullet(self.bullet, self.HitBox.GetPos('x', True) + self.BulletIntervalx * 2 , self.HitBox.GetPos('y') + self.HitBox.GetSize('h') - self.BulletIntervaly * 1.5, self.ATK, 10, 180))
         
         elif (Type == 'LASER'):
             self.LaserSprite = [Bullet.Bullet(pygame.transform.scale(laser, (27, 1000)), self.HitBox.GetPos('x', True) - 2, self.HitBox.GetPos('y') + self.HitBox.GetSize('h') + 36, self.ATK, 0, 180),
@@ -118,7 +117,7 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
         
         elif (Type == 'SPINBULLET'):
             if (self.isSpin):
-                self.ProjectileList.append(Bullet.Bullet(pygame.transform.scale(spinbullet, (30, 30)), self.SpinPos.x, self.SpinPos.y , self.ATK, 4,  self.SpinAngle * 12.5))
+                self.ProjectileList.append(Bullet.Bullet(self.spinbullet, self.SpinPos.x, self.SpinPos.y , self.ATK, 4,  self.SpinAngle * 12.5))
                 self.isSpin = False
                 self.StartSpin = pygame.time.get_ticks()
                     

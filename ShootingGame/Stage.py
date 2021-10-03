@@ -11,6 +11,9 @@ import BossAirCraft
 주로 게임 화면 및 각 스테이지 난이도 구현을 지원하며, 각 오브젝트의 업데이트를 지원함
 '''
 
+tmpemap = pygame.image.load('ShootingGame/samplemap.png')
+samplemap = pygame.transform.scale(tmpemap, (1000, 1000))
+
 class Stage(System.System):
     def __init__(self, Level, Score):
         super().__init__()
@@ -33,7 +36,7 @@ class Stage(System.System):
         '''
         self.PLAYER = PlayerAirCraft.PlayerAirCraft(360, 700)
         self.BOSS = BossAirCraft.BossAirCraft(10000, 10000, 10000, -999999999999)
-        self.EnemyList.append(EnemyAirCraft.MissileEnemy(1000, 10, 10, 30, -400))
+        self.EnemyList.append(EnemyAirCraft.MissileEnemy(1000, 10, 10, 300, 0))
         
     def OpeningScreen(self):
         '''
@@ -57,13 +60,14 @@ class Stage(System.System):
         '''
         스테이지를 그려주는 메서드
         '''
+        self.DrawStage()
         self.DrawObject()
         
     def DrawStage(self):
         '''
         스테이지 배경화면을 그려주는 메서드
         '''
-        pass
+        self.GAMESCREEN.blit(samplemap, (0, 0))
     
     def DrawObject(self):
         '''
