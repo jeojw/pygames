@@ -33,6 +33,7 @@ class Bullet(System.System):
     
     def Draw(self):
         self.GAMESCREEN.blit(self.sprite, (self.pos.x, self.pos.y))
+        self.HitBox.Draw()
 
     def Update(self):
         self.pos -= self.VEL

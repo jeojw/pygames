@@ -6,8 +6,13 @@ import Bullet
 import Camera
 
 tmplist = [pygame.image.load('ShootingGame/Sprite/Player_Sprite_' + str(i) + '.png') for i in range(1, 4)]
+tmplist2 = [pygame.image.load('ShootingGame/Sprite/Player_ShieldSprite_' + str(i) + '.png') for i in range(1, 4)]
+tmplist.extend(tmplist2)
 Invincible = pygame.image.load('ShootingGame/Sprite/Invincible_Sprite.png')
 explode = pygame.image.load('ShootingGame/Sprite/explode_effect.png')
+shield= pygame.image.load('ShootingGame/Sprite/Player_Shield_1.png')
+shield_1 = pygame.transform.scale(shield, (90, 90))
+shield_2 = pygame.transform.scale(shield, (120, 120))
 
 class PlayerAirCraft(AirCraft.AirCraft):
     def __init__(self, x_pos, y_pos):
@@ -21,6 +26,9 @@ class PlayerAirCraft(AirCraft.AirCraft):
         self.Condition = 'NonInvincible'
         
         self.isGetItem = False
+        self.isShield = False
+        self.curShield = shield_1
+        self.shieldpos = pygame.math.Vector2(x_pos, y_pos)
         
         self.BulletStack = Stack.Stack()
         self.index = self.BulletStack.GetSize()
@@ -29,6 +37,9 @@ class PlayerAirCraft(AirCraft.AirCraft):
                            pygame.transform.scale(tmplist[0], (60, 60)),
                            pygame.transform.scale(tmplist[1], (60, 60)),
                            pygame.transform.scale(tmplist[2], (84, 60)),
+                           pygame.transform.scale(tmplist[3], (90, 90)),
+                           pygame.transform.scale(tmplist[4], (90, 90)),
+                           pygame.transform.scale(tmplist[5], (120, 120)),
                            Invincible, explode]
         self.BulletSpriteL = [pygame.image.load('ShootingGame/Sprite/Bullet/player_bullet_step_' + str(i) + '.png') for i in range(1, 3)]
         self.HitBox = HitBox.HitBox(self.SpriteList[self.index], self.pos.x, self.pos.y)
@@ -83,8 +94,12 @@ class PlayerAirCraft(AirCraft.AirCraft):
     def DrawStat(self):
         for i in range(self.HEARTS):
             pygame.draw.circle(self.GAMESCREEN, (255, 0, 0), [740 + i * 50, 150], 20)
+        
+        if (self.isShield):
+            self.GAMESCREEN.blit(self.curShield, (self.shieldpos.x, self.shieldpos.y))
     
     def Draw(self):
+        self.HitBox.Draw()
         self.DrawPos()
         self.DrawStat()
         
@@ -101,6 +116,12 @@ class PlayerAirCraft(AirCraft.AirCraft):
                 self.ProjectileList.append(Bullet.Bullet(self.BulletSpriteL[self.bulletindex], self.HitBox.GetPos('x', True) - self.BulletInterval * i * 2, self.HitBox.GetPos('y'), self.ATK, 10, self.BulletAngle * i))
             for i in range(-2, 3, 4):
                 self.ProjectileList.append(Bullet.Bullet(self.BulletSpriteL[self.bulletindex], self.HitBox.GetPos('x', True) - self.BulletInterval * i * 2.5, self.HitBox.GetPos('y'), self.ATK, 10))
+                
+    def GetShield(self):
+        self.isShield = True
+        
+    def ShieldOff(self):
+        self.isShield = False
         
     def UpdateStat(self, Stage):
         if (Stage.SupplyType == 'ATK'):
@@ -110,6 +131,21 @@ class PlayerAirCraft(AirCraft.AirCraft):
                         
         elif (Stage.SupplyType == 'HP'):
             pass
+        
+        
+        elif (Stage.SupplyType == 'SHIELD'):
+            self.GetShield()
+            Stage.SupplyType = None
+            
+        if (self.isShield):
+            if (self.BulletStack.GetSize() < 3):
+                self.curShield = shield_1
+            elif (self.BulletStack.GetSize() == 3):
+                self.curShield = shield_2   
+            
+            diffsize = pygame.math.Vector2(abs(self.curShield.get_width() - self.SpriteList[self.index].get_width()) / 2, abs(self.curShield.get_height() - self.SpriteList[self.index].get_height()) / 2)
+            self.shieldpos = pygame.math.Vector2(self.pos.x - diffsize.x, self.pos.y - diffsize.y)        
+            self.HitBox.UpdateSize(self.curShield)
                 
         if (self.BulletStack.GetSize() == 0):
             self.bulletindex = 0
@@ -133,19 +169,25 @@ class PlayerAirCraft(AirCraft.AirCraft):
         for enemy in Stage.EnemyList:
             for bullet in enemy.ProjectileList:
                 if (self.HitBox.CheckCollision(bullet.HitBox)):
+                    if (not self.isShield):
+                        self.HEARTS -= 1
+                        self.Condition = 'Invincible'
+                        self.BulletStack.pop()
+                        self.HitBox.Collidable = False
+                        self.StartInvincible = pygame.time.get_ticks()
+                    else:
+                        self.ShieldOff()
+                    
+        for bullet in Stage.BOSS.ProjectileList:
+            if (self.HitBox.CheckCollision(bullet.HitBox)):
+                if (not self.isShield):
                     self.HEARTS -= 1
                     self.Condition = 'Invincible'
                     self.BulletStack.pop()
                     self.HitBox.Collidable = False
                     self.StartInvincible = pygame.time.get_ticks()
-                    
-        for bullet in Stage.BOSS.ProjectileList:
-            if (self.HitBox.CheckCollision(bullet.HitBox)):
-                self.HEARTS -= 1
-                self.Condition = 'Invincible'
-                self.BulletStack.pop()
-                self.HitBox.Collidable = False
-                self.StartInvincible = pygame.time.get_ticks()
+                else:
+                    self.ShieldOff()
 
         if (not self.HitBox.Collidable):
             self.ElapsedInvincible = (pygame.time.get_ticks() - self.StartInvincible) / 1000

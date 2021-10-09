@@ -46,10 +46,10 @@ def rungame(Sys, Stage):
         
         Sys.InputText(Sys.SMALLFONT, str(Stage.BOSS.SCElapsed) + '  ' 
                       + str(Stage.BOSS.CoolElapsed) + '  ' 
-                      + str(Stage.BOSS.LaserElapsed) + '  ' 
+                      + str(Stage.PLAYER.isShield) + '  ' 
                       + str(Stage.PLAYER.pos) + '  '
-                      + str('xx') + '  '
-                      + str(Stage.EnemyList[0].MissileShoot), Sys.COLORDIC['BLUE'], 30, 30)
+                      + str(Stage.EnemyList[0].MissileShoot) + '  '
+                      + str(Stage.EnemyList[0].MissileOff), Sys.COLORDIC['BLUE'], 30, 30)
         pygame.display.flip()
         Sys.FPSCLOCK.tick(Sys.FPS)
 

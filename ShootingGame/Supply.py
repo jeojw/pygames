@@ -7,7 +7,8 @@ import HitBox
 '''
 
 IconDic = {'ATK': pygame.image.load('ShootingGame/ItemIcon/ATK_item.png'),
-           'HP': None}
+           'HP': None,
+           'SHIELD': pygame.image.load('ShootingGame/ItemIcon/ATK_item.png')}
 
 class Supply(System.System):
     def __init__(self, Type, x_pos, y_pos):
