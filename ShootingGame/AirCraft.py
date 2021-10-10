@@ -46,6 +46,12 @@ class AirCraft(System.System):
     def Static(self):
         self.isMove = False
         self.direction = None
+        
+    def GetAttack(self):
+        self.isGetAttack = True
+        
+    def NotGetAttack(self):
+        self.isGetAttack = False
     
     def DrawPos(self):
         '''
@@ -59,6 +65,6 @@ class AirCraft(System.System):
         이 메서드는 위치조정을 주로 맡고, 나머지는 자식 클래스에서 새로 설정하도록 함
         '''
         before = self.SizeQueue.dequeue()
-        diffPos = pygame.math.Vector2(abs(self.SpriteList[self.index].get_width() - before[0]), abs(self.SpriteList[self.index].get_height() - before[1]))
+        diffPos = pygame.math.Vector2(abs(self.SpriteList[self.index].get_width() - before[0]) / 2, abs(self.SpriteList[self.index].get_height() - before[1]) / 2)
         self.pos -= diffPos
         self.SizeQueue.enqueue(self.SpriteList[self.index].get_size())

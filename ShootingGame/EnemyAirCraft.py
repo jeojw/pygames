@@ -84,8 +84,9 @@ class EnemyAirCraft(AirCraft.AirCraft):
         
     def UpdateStat(self, Player):
         for bullet in Player.ProjectileList:
-            if (self.HitBox.CheckCollision(bullet.HitBox)):
+            if (self.isGetAttack):
                 self.HP -= (bullet.ATK - self.DEF)
+                self.NotGetAttack()
     
     def UpdateCondition(self):
         if (self.pos.y >= 200):
@@ -250,7 +251,7 @@ class MissileEnemy(EnemyAirCraft):
         if (self.MissileReady and self.isDetect):
             self.SetMissile()
         elif (not self.MissileReady and self.MissileShoot):
-            self.missilemove += 0.1
+            self.missilemove += 1
             for i in range(len(self.ProjectileList)):
                 self.ProjectileList[i].VEL.y = self.MissileMovement(self.missilemove)
             

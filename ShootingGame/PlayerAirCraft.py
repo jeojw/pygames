@@ -10,6 +10,7 @@ tmplist2 = [pygame.image.load('ShootingGame/Sprite/Player_ShieldSprite_' + str(i
 tmplist.extend(tmplist2)
 Invincible = pygame.image.load('ShootingGame/Sprite/Invincible_Sprite.png')
 explode = pygame.image.load('ShootingGame/Sprite/explode_effect.png')
+explode_effect = pygame.transform.scale(explode, (70, 70))
 shield= pygame.image.load('ShootingGame/Sprite/Player_Shield_1.png')
 shield_1 = pygame.transform.scale(shield, (90, 90))
 shield_2 = pygame.transform.scale(shield, (120, 120))
@@ -17,6 +18,7 @@ shield_2 = pygame.transform.scale(shield, (120, 120))
 class PlayerAirCraft(AirCraft.AirCraft):
     def __init__(self, x_pos, y_pos):
         super().__init__(x_pos, y_pos)
+        self.MAXHEARTS = 6
         self.HEARTS = 4
         self.ATK = 100 # 공격력
         self.DEF = 20 # 방어력
@@ -40,7 +42,7 @@ class PlayerAirCraft(AirCraft.AirCraft):
                            pygame.transform.scale(tmplist[3], (90, 90)),
                            pygame.transform.scale(tmplist[4], (90, 90)),
                            pygame.transform.scale(tmplist[5], (120, 120)),
-                           Invincible, explode]
+                           Invincible, explode_effect]
         self.BulletSpriteL = [pygame.image.load('ShootingGame/Sprite/Bullet/player_bullet_step_' + str(i) + '.png') for i in range(1, 3)]
         self.HitBox = HitBox.HitBox(self.SpriteList[self.index], self.pos.x, self.pos.y)
         self.SizeQueue.enqueue(self.SpriteList[self.index].get_size())
@@ -59,7 +61,7 @@ class PlayerAirCraft(AirCraft.AirCraft):
         
         self.BulletInterval = 7
         self.BulletAngle = 10
-        self.AtkCool = 0.2
+        self.AtkCool = 0.5
         self.StartCool = 0
         self.ElapsedCool = 0
         
@@ -127,14 +129,19 @@ class PlayerAirCraft(AirCraft.AirCraft):
         if (Stage.SupplyType == 'ATK'):
             if (self.BulletStack.GetSize() <= 3):
                 self.BulletStack.push(True)
-                Stage.SupplyType = None
+            Stage.SupplyType = None
                         
-        elif (Stage.SupplyType == 'HP'):
-            pass
-        
+        elif (Stage.SupplyType == 'RECOVERY'):
+            if (self.HEARTS < self.MAXHEARTS):
+                self.HEARTS += 1
+            Stage.SupplyType = None
         
         elif (Stage.SupplyType == 'SHIELD'):
             self.GetShield()
+            Stage.SupplyType = None
+            
+        elif (Stage.SupplyType == 'AS'):
+            self.AtkCool = 0.3
             Stage.SupplyType = None
             
         if (self.isShield):
@@ -165,29 +172,19 @@ class PlayerAirCraft(AirCraft.AirCraft):
             self.ElapsedCool = 0
             self.StartCool = 0
         '''
-
-        for enemy in Stage.EnemyList:
-            for bullet in enemy.ProjectileList:
-                if (self.HitBox.CheckCollision(bullet.HitBox)):
-                    if (not self.isShield):
-                        self.HEARTS -= 1
-                        self.Condition = 'Invincible'
-                        self.BulletStack.pop()
-                        self.HitBox.Collidable = False
-                        self.StartInvincible = pygame.time.get_ticks()
-                    else:
-                        self.ShieldOff()
-                    
-        for bullet in Stage.BOSS.ProjectileList:
-            if (self.HitBox.CheckCollision(bullet.HitBox)):
-                if (not self.isShield):
-                    self.HEARTS -= 1
-                    self.Condition = 'Invincible'
-                    self.BulletStack.pop()
-                    self.HitBox.Collidable = False
-                    self.StartInvincible = pygame.time.get_ticks()
-                else:
-                    self.ShieldOff()
+        
+        if (self.isGetAttack):
+            if (not self.isShield):
+                self.HEARTS -= 1
+                self.Condition = 'Invincible'
+                self.BulletStack.pop()
+                if (self.AtkCool != 0.5):
+                    self.AtkCool = 0.5
+                self.HitBox.Collidable = False
+                self.StartInvincible = pygame.time.get_ticks()
+            else:
+                self.ShieldOff()
+            self.NotGetAttack()
 
         if (not self.HitBox.Collidable):
             self.ElapsedInvincible = (pygame.time.get_ticks() - self.StartInvincible) / 1000

@@ -285,11 +285,6 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
                                                                  self.MAXHP * convertCoefficient, 10], 2)
             pygame.draw.rect(self.GAMESCREEN, self.COLORDIC['RED'], [self.HitBox.GetPos('x', True) - self.HitBox.GetSize('w'), self.HitBox.GetPos('y', True) + self.HitBox.GetSize('h') / 2,
                                                                  self.HP * convertCoefficient, 10])
-        
-    def UpdateStat(self, Player):
-        for bullet in Player.ProjectileList:
-            if (self.HitBox.CheckCollision(bullet.HitBox)):
-                self.HP -= (bullet.ATK - self.DEF)
     
     def UpdateCondition(self, Player):
         y_distance = abs(self.GetPos('y', True) - Player.GetPos('y', True))
