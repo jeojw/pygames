@@ -107,7 +107,7 @@ class EnemyAirCraft(AirCraft.AirCraft):
         
     def UpdatePos(self):
         super().UpdatePos()
-
+        
         if (self.pos.x < 0):
             self.pos.x = 0
         elif (self.pos.x + self.HitBox.GetSize('w') > self.LIMITSIZE.x):
@@ -231,19 +231,21 @@ class MissileEnemy(EnemyAirCraft):
         
     def UpdatePos(self):
         super().UpdatePos()
-        self.movesec += 0.1
-        if (self.movesec >= 2 * math.pi):
-            self.movesec = 0
+        if (not self.isDead):
+            self.movesec += 0.1
+            if (self.movesec >= 2 * math.pi):
+                self.movesec = 0
         
-        if (not self.isDetect):
-            self.pos -= self.VEL * 1.5
-        else:
-            if (self.MissileReady):
-                self.Static()
-            else:
-                self.pos = self.Movement(self.movesec)
+            if (not self.isDead):
+                if (not self.isDetect):
+                    self.pos -= self.VEL * 1.5
+                else:
+                    if (self.MissileReady):
+                        self.Static()
+                    else:
+                        self.pos = self.Movement(self.movesec)
             
-        self.HitBox.UpdatePos(self.pos.x, self.pos.y)
+                self.HitBox.UpdatePos(self.pos.x, self.pos.y)
         
     def UpdateCondition(self):
         super().UpdateCondition()

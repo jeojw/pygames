@@ -304,18 +304,19 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
                 self.removeable = True
         
     def UpdatePos(self):
-        if (not self.isDetect):
-            self.pos -= self.VEL * 1.5
-        else:
-            if (self.CurPattern == 'NORMAL'):
-                self.movevariable += 0.05
-                self.pos = self.EightMovement(self.movevariable)
-                self.SpinPos.x = self.pos.x + 300
-                self.SpinPos.y = self.pos.y + 105
+        if (not self.isDead):
+            if (not self.isDetect):
+                self.pos -= self.VEL * 1.5
             else:
-                self.Static()
+                if (self.CurPattern == 'NORMAL'):
+                    self.movevariable += 0.05
+                    self.pos = self.EightMovement(self.movevariable)
+                    self.SpinPos.x = self.pos.x + 300
+                    self.SpinPos.y = self.pos.y + 105
+                else:
+                    self.Static()
             
-        self.HitBox.UpdatePos(self.pos.x, self.pos.y)
+            self.HitBox.UpdatePos(self.pos.x, self.pos.y)
         
     def EightMovement(self, t):
         return pygame.math.Vector2(math.sin(4 * t) * 40 + self.initx, math.sin(8 * t) * 5)
