@@ -3,3 +3,8 @@ https://pixieengine.com/ -> 도트 찍는 웹사이트
 https://www.desmos.com/calculator?lang=ko -> 그래프 그리는 사이트
 
 #DD2C2C
+
+if (self.ElapsedTwinkle > self.TwinkleTime):
+                self.TwinkleStack += 1
+                self.ElapsedTwinkle = 0
+                self.StartTwinkle = 0

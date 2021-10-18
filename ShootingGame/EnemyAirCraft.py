@@ -16,6 +16,7 @@ class EnemyAirCraft(AirCraft.AirCraft):
         self.HP = MAXHP
         self.ATK = ATK
         self.DEF = DEF
+        self.DEF = DEF
         self.VEL = pygame.math.Vector2(0, -6)
         self.initpos = pygame.math.Vector2(x_pos, y_pos)
         self.moveposy = 600
@@ -218,10 +219,10 @@ class MissileEnemy(EnemyAirCraft):
         self.ProjectileList.append(Bullet.Bullet(self.bullet, self.HitBox.GetPos('x', True), self.HitBox.GetPos('y') + self.HitBox.GetSize('h'), self.ATK, 10, 180))
         
     def MissileMovement(self, t):
-        if (t <= 12 and t >= 0):
+        if (t <= 14 and t >= 0):
             return math.pow(t, 0.8) * -1
-        elif (t > 12):
-            return math.pow((t - 10), 2.8) * -1
+        elif (t > 14):
+            return math.pow((t - 12), 1.9) * -1
         
     def Movement(self, t):
         if (t >= 0 and t < math.pi):

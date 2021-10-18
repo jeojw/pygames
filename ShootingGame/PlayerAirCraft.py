@@ -6,8 +6,6 @@ import Bullet
 import Camera
 
 tmplist = [pygame.image.load('ShootingGame/Sprite/Player_Sprite_' + str(i) + '.png') for i in range(1, 4)]
-tmplist2 = [pygame.image.load('ShootingGame/Sprite/Player_ShieldSprite_' + str(i) + '.png') for i in range(1, 4)]
-tmplist.extend(tmplist2)
 Invincible = pygame.image.load('ShootingGame/Sprite/Invincible_Sprite.png')
 explode = pygame.image.load('ShootingGame/Sprite/explode_effect.png')
 explode_effect = pygame.transform.scale(explode, (70, 70))
@@ -20,30 +18,32 @@ class PlayerAirCraft(AirCraft.AirCraft):
         super().__init__(x_pos, y_pos)
         self.MAXHEARTS = 6
         self.HEARTS = 4
-        self.ATK = 100 # 공격력
-        self.DEF = 20 # 방어력
+        self.ATK = 30 # 공격력
         self.ATKCOUNTS = 2 # 발사되는 투사체 개수
         self.VEL = pygame.math.Vector2(6, 6) # 속도
         self.PlayerStat = [4, 100, 20, 2] # 플레이어의 스텟을 저장하는 리스트
-        self.Condition = 'NonInvincible'
+        self.Condition = 'Normal'
+        self.TwinkleStack = 0
         
         self.isGetItem = False
         self.isShield = False
+        self.isTwinkle = False
         self.curShield = shield_1
         self.shieldpos = pygame.math.Vector2(x_pos, y_pos)
         
         self.BulletStack = Stack.Stack()
         self.index = self.BulletStack.GetSize()
-        self.bulletindex = 0
+        self.bulletindex = self.BulletStack.GetSize()
         self.SpriteList = [pygame.transform.scale(tmplist[0], (60, 60)),
                            pygame.transform.scale(tmplist[0], (60, 60)),
                            pygame.transform.scale(tmplist[1], (60, 60)),
                            pygame.transform.scale(tmplist[2], (84, 60)),
-                           pygame.transform.scale(tmplist[3], (90, 90)),
-                           pygame.transform.scale(tmplist[4], (90, 90)),
-                           pygame.transform.scale(tmplist[5], (120, 120)),
-                           Invincible, explode_effect]
-        self.BulletSpriteL = [pygame.image.load('ShootingGame/Sprite/Bullet/player_bullet_step_' + str(i) + '.png') for i in range(1, 3)]
+                           pygame.transform.scale(Invincible, (60, 60)),
+                           pygame.transform.scale(Invincible, (60, 60)),
+                           pygame.transform.scale(Invincible, (60, 60)),
+                           pygame.transform.scale(Invincible, (84, 60)),
+                           explode_effect]
+        self.BulletSpriteL = [pygame.image.load('ShootingGame/Sprite/Bullet/PlayerBullet/player_bullet_step_' + str(i) + '.png') for i in range(1, 4)]
         self.HitBox = HitBox.HitBox(self.SpriteList[self.index], self.pos.x, self.pos.y)
         self.SizeQueue.enqueue(self.SpriteList[self.index].get_size())
         
@@ -51,11 +51,7 @@ class PlayerAirCraft(AirCraft.AirCraft):
         self.StartTime = 0
         self.ElapsedTime = 0
         
-        self.InvincibleTime = 1.5
-        self.StartInvincible = 0
-        self.ElapsedInvincible = 0
-        
-        self.TwinkleTime = 0.01
+        self.TwinkleTime = 0.5
         self.StartTwinkle = 0
         self.ElapsedTwinkle = 0
         
@@ -111,13 +107,13 @@ class PlayerAirCraft(AirCraft.AirCraft):
     
         if (size == 2):
             for i in range(-1, 2, 2):
-                self.ProjectileList.append(Bullet.Bullet(self.BulletSpriteL[self.bulletindex], self.HitBox.GetPos('x', True) - self.BulletInterval * i * 2, self.HitBox.GetPos('y'), self.ATK, 10, self.BulletAngle * i))
+                self.ProjectileList.append(Bullet.Bullet(self.BulletSpriteL[self.bulletindex - 2], self.HitBox.GetPos('x', True) - self.BulletInterval * i * 2, self.HitBox.GetPos('y'), self.ATK, 10, self.BulletAngle * i))
         
         elif (size == 3):
             for i in range(-1, 2, 2):
-                self.ProjectileList.append(Bullet.Bullet(self.BulletSpriteL[self.bulletindex], self.HitBox.GetPos('x', True) - self.BulletInterval * i * 2, self.HitBox.GetPos('y'), self.ATK, 10, self.BulletAngle * i))
+                self.ProjectileList.append(Bullet.Bullet(self.BulletSpriteL[self.bulletindex + 1], self.HitBox.GetPos('x', True) - self.BulletInterval * i * 2, self.HitBox.GetPos('y'), self.ATK, 10, self.BulletAngle * i))
             for i in range(-2, 3, 4):
-                self.ProjectileList.append(Bullet.Bullet(self.BulletSpriteL[self.bulletindex], self.HitBox.GetPos('x', True) - self.BulletInterval * i * 2.5, self.HitBox.GetPos('y'), self.ATK, 10))
+                self.ProjectileList.append(Bullet.Bullet(self.BulletSpriteL[self.bulletindex - 3], self.HitBox.GetPos('x', True) - self.BulletInterval * i * 2.5, self.HitBox.GetPos('y'), self.ATK, 10))
                 
     def GetShield(self):
         self.isShield = True
@@ -153,11 +149,6 @@ class PlayerAirCraft(AirCraft.AirCraft):
             diffsize = pygame.math.Vector2(abs(self.curShield.get_width() - self.SpriteList[self.index].get_width()) / 2, abs(self.curShield.get_height() - self.SpriteList[self.index].get_height()) / 2)
             self.shieldpos = pygame.math.Vector2(self.pos.x - diffsize.x, self.pos.y - diffsize.y)        
             self.HitBox.UpdateSize(self.curShield)
-                
-        if (self.BulletStack.GetSize() == 0):
-            self.bulletindex = 0
-        elif (self.BulletStack.GetSize() >= 1):
-            self.bulletindex = 1
     
     def UpdateCondition(self, Stage):
         
@@ -181,18 +172,26 @@ class PlayerAirCraft(AirCraft.AirCraft):
                 if (self.AtkCool != 0.5):
                     self.AtkCool = 0.5
                 self.HitBox.Collidable = False
-                self.StartInvincible = pygame.time.get_ticks()
             else:
                 self.ShieldOff()
             self.NotGetAttack()
-
+        
         if (not self.HitBox.Collidable):
-            self.ElapsedInvincible = (pygame.time.get_ticks() - self.StartInvincible) / 1000
-            if (self.ElapsedInvincible > self.InvincibleTime):
-                self.Condition = 'NonInvincible'
+            if (not self.isTwinkle):
+                self.StartTwinkle = pygame.time.get_ticks()
+                self.isTwinkle = True
+        
+            self.ElapsedTwinkle = (pygame.time.get_ticks() - self.StartTwinkle) / 1000
+            if (self.ElapsedTwinkle > self.TwinkleTime):
+                self.TwinkleStack += 1
+                self.isTwinkle = False
+                self.ElapsedTwinkle = 0
+                self.StartTwinkle = 0
+
+            if (self.TwinkleStack > 4):
+                self.Condition = 'Normal'
                 self.HitBox.Collidable = True
-                self.ElapsedInvincible = 0
-                self.StartInvincible = 0
+                self.TwinkleStack = 0
                 
         if (self.HEARTS <= 0):
             self.isDead = True
@@ -225,11 +224,10 @@ class PlayerAirCraft(AirCraft.AirCraft):
             
     def UpdateSprite(self):
         self.index = self.BulletStack.GetSize()
-        if (self.Condition == 'Invincible'):
-            if (self.ElapsedInvincible > self.InvincibleTime):
-                self.index = self.BulletStack.GetSize()
-                self.ElapsedTime = 0
-                self.StartTime = 0
+        if (self.isTwinkle):
+            self.index = self.BulletStack.GetSize() + 4
+        else:
+            self.index = self.BulletStack.GetSize()
                 
         if (self.isDead):
             self.index = len(self.SpriteList) - 1

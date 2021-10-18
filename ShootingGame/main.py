@@ -10,34 +10,40 @@ def rungame(Sys, Stage):
         Sys.GAMESCREEN.fill(Sys.COLORDIC['WHITE'])
         pygame.draw.rect(Sys.GAMESCREEN, Sys.COLORDIC['BLUE'], (700, 0, 300, 1000))
         
+        KEYS = pygame.key.get_pressed()
+        
+        if (KEYS[pygame.K_LEFT]):
+            Stage.PLAYER.Left()
+            
+        elif (KEYS[pygame.K_RIGHT]):
+            Stage.PLAYER.Right()
+            
+        elif (KEYS[pygame.K_UP]):
+            Stage.PLAYER.Up()
+            
+        elif (KEYS[pygame.K_DOWN]):
+            Stage.PLAYER.Down()
+        
+        elif (KEYS[pygame.K_ESCAPE]):
+            pygame.quit()
+            sys.exit()
+            
+        elif (not KEYS[pygame.K_LEFT] and
+              not KEYS[pygame.K_RIGHT] and
+              not KEYS[pygame.K_UP] and
+              not KEYS[pygame.K_DOWN]):
+            Stage.PLAYER.Static()
+            
+        if (KEYS[pygame.K_LEFT] or
+            KEYS[pygame.K_RIGHT] or
+            KEYS[pygame.K_UP] or
+            KEYS[pygame.K_DOWN]):
+            Stage.PLAYER.Move()
+        
         for event in pygame.event.get():
             if (event.type == pygame.QUIT):
                 pygame.quit()
                 sys.exit()
-
-            elif (event.type == pygame.KEYDOWN):
-                if (event.key == pygame.K_LEFT):
-                    Stage.PLAYER.Left()
-                    Stage.PLAYER.Move()
-                elif (event.key == pygame.K_RIGHT):
-                    Stage.PLAYER.Right()
-                    Stage.PLAYER.Move()
-                elif (event.key == pygame.K_UP):
-                    Stage.PLAYER.Up()
-                    Stage.PLAYER.Move()
-                elif (event.key == pygame.K_DOWN):
-                    Stage.PLAYER.Down()
-                    Stage.PLAYER.Move()
-                elif (event.key == pygame.K_ESCAPE):
-                    pygame.quit()
-                    sys.exit()
-                    
-            elif (event.type == pygame.KEYUP):
-                if (event.key == pygame.K_LEFT or
-                    event.key == pygame.K_RIGHT or
-                    event.key == pygame.K_UP or
-                    event.key == pygame.K_DOWN):
-                    Stage.PLAYER.Static()
                     
         Stage.Update(dt) # 순서에 따라 출력하는 결과가 다르다.. 왤까
         Stage.PLAYER.Update(Stage)
@@ -45,11 +51,11 @@ def rungame(Sys, Stage):
         Stage.PLAYER.Draw()
         
         Sys.InputText(Sys.SMALLFONT, str(Stage.BOSS.SCElapsed) + '  ' 
-                      + str(Stage.BOSS.CoolElapsed) + '  ' 
-                      + str(Stage.PLAYER.isShield) + '  ' 
-                      + str(Stage.PLAYER.pos) + '  '
-                      + str(Stage.EnemyList[0].MissileShoot) + '  '
-                      + str(Stage.EnemyList[0].MissileOff), Sys.COLORDIC['BLUE'], 30, 30)
+                      + str(Stage.PLAYER.StartTwinkle) + '  ' 
+                      + str(Stage.PLAYER.ElapsedTwinkle) + '  ' 
+                      + str(Stage.PLAYER.TwinkleStack) + '  '
+                      ,Sys.COLORDIC['BLUE'], 30, 30)
+        
         pygame.display.flip()
         Sys.FPSCLOCK.tick(Sys.FPS)
 
