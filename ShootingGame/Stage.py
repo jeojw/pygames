@@ -108,7 +108,11 @@ class Stage(System.System):
             for enemy in self.EnemyList:
                 if (enemy.HitBox.CheckCollision(bullet.HitBox)):
                     enemy.GetAttack()
-                    self.PLAYER.ProjectileList.remove(bullet)
+                    bullet.IsCollide()
+                    bullet.DrawEffect()
+                    if (not bullet.isExist):
+                        self.PLAYER.ProjectileList.remove(bullet)
+                    
             if (self.BOSS.HitBox.CheckCollision(bullet.HitBox)):
                 self.BOSS.GetAttack()
                 self.PLAYER.ProjectileList.remove(bullet)

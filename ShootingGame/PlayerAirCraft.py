@@ -5,6 +5,7 @@ import Stack
 import Bullet
 import Camera
 
+# 플레이어 탄환 스프라이트 조정할 것!!!
 tmplist = [pygame.image.load('ShootingGame/Sprite/Player_Sprite_' + str(i) + '.png') for i in range(1, 4)]
 Invincible = pygame.image.load('ShootingGame/Sprite/Invincible_Sprite.png')
 explode = pygame.image.load('ShootingGame/Sprite/explode_effect.png')
@@ -19,6 +20,7 @@ class PlayerAirCraft(AirCraft.AirCraft):
         self.MAXHEARTS = 6
         self.HEARTS = 4
         self.ATK = 30 # 공격력
+        self.ATKcoff = 1.2
         self.ATKCOUNTS = 2 # 발사되는 투사체 개수
         self.VEL = pygame.math.Vector2(6, 6) # 속도
         self.PlayerStat = [4, 100, 20, 2] # 플레이어의 스텟을 저장하는 리스트
@@ -102,18 +104,21 @@ class PlayerAirCraft(AirCraft.AirCraft):
         self.DrawStat()
         
     def SetBullets(self, size):
-        for i in range(-1, 2, 2):
-            self.ProjectileList.append(Bullet.Bullet(self.BulletSpriteL[self.bulletindex], self.HitBox.GetPos('x', True) - self.BulletInterval * i, self.HitBox.GetPos('y'), self.ATK, 10))
+        if (size <= 1):
+            for i in range(-1, 2, 2):
+                self.ProjectileList.append(Bullet.Bullet(self.BulletSpriteL[size], self.HitBox.GetPos('x', True) - self.BulletInterval * i, self.HitBox.GetPos('y'), self.ATK, 10))
     
         if (size == 2):
             for i in range(-1, 2, 2):
-                self.ProjectileList.append(Bullet.Bullet(self.BulletSpriteL[self.bulletindex - 2], self.HitBox.GetPos('x', True) - self.BulletInterval * i * 2, self.HitBox.GetPos('y'), self.ATK, 10, self.BulletAngle * i))
+                self.ProjectileList.append(Bullet.Bullet(self.BulletSpriteL[size], self.HitBox.GetPos('x', True) - self.BulletInterval * i, self.HitBox.GetPos('y'), self.ATK * (self.ATKcoff * (size - 1)), 10))
+                self.ProjectileList.append(Bullet.Bullet(self.BulletSpriteL[size - 2], self.HitBox.GetPos('x', True) - self.BulletInterval * i * 2, self.HitBox.GetPos('y'), self.ATK, 10, self.BulletAngle * i))
         
         elif (size == 3):
             for i in range(-1, 2, 2):
-                self.ProjectileList.append(Bullet.Bullet(self.BulletSpriteL[self.bulletindex + 1], self.HitBox.GetPos('x', True) - self.BulletInterval * i * 2, self.HitBox.GetPos('y'), self.ATK, 10, self.BulletAngle * i))
+                self.ProjectileList.append(Bullet.Bullet(self.BulletSpriteL[size -  1], self.HitBox.GetPos('x', True) - self.BulletInterval * i, self.HitBox.GetPos('y'), self.ATK * (self.ATKcoff * (size - 1)), 10))
+                self.ProjectileList.append(Bullet.Bullet(self.BulletSpriteL[size - 2], self.HitBox.GetPos('x', True) - self.BulletInterval * i * 2, self.HitBox.GetPos('y'), self.ATK * (self.ATKcoff * (size - 2)), 10, self.BulletAngle * i))
             for i in range(-2, 3, 4):
-                self.ProjectileList.append(Bullet.Bullet(self.BulletSpriteL[self.bulletindex - 3], self.HitBox.GetPos('x', True) - self.BulletInterval * i * 2.5, self.HitBox.GetPos('y'), self.ATK, 10))
+                self.ProjectileList.append(Bullet.Bullet(self.BulletSpriteL[size - 3], self.HitBox.GetPos('x', True) - self.BulletInterval * i * 2.5, self.HitBox.GetPos('y'), self.ATK, 10))
                 
     def GetShield(self):
         self.isShield = True

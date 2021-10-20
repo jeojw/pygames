@@ -50,7 +50,7 @@ def rungame(Sys, Stage):
         Stage.Draw()
         Stage.PLAYER.Draw()
         
-        Sys.InputText(Sys.SMALLFONT, str(Stage.BOSS.SCElapsed) + '  ' 
+        Sys.InputText(Sys.SMALLFONT, str(Stage.PLAYER.ProjectileList[0].StartExist) + '  ' 
                       + str(Stage.PLAYER.StartTwinkle) + '  ' 
                       + str(Stage.PLAYER.ElapsedTwinkle) + '  ' 
                       + str(Stage.PLAYER.TwinkleStack) + '  '

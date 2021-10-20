@@ -81,15 +81,25 @@ class EnemyAirCraft(AirCraft.AirCraft):
                                                                  self.HP * convertCoefficient, 7])
         
     def Movement(self, t):
+        '''
+        적기의 움직임을 반환하는 메서드
+        '''
         pass
         
     def UpdateStat(self, Player):
+        '''
+        스텟 업데이트 메서드
+        여기에서는 피격시 hp감소만 구현
+        '''
         for bullet in Player.ProjectileList:
             if (self.isGetAttack):
                 self.HP -= (bullet.ATK - self.DEF)
                 self.NotGetAttack()
     
     def UpdateCondition(self):
+        '''
+        적기의
+        '''
         if (self.pos.y >= 200):
             self.isDetect = True
             self.initpos.y = 200

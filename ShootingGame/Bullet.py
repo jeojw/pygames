@@ -5,11 +5,20 @@ import System
 '''
 오브젝트들이 발사하는 탄환을 설정해주는 클래스
 '''
+'''
+탄환 충돌 시 이펙트가 출력되는 효과를 제대로 구현해 볼것 -> 일단 Bullet 클래스 내에서 구현해볼 예정
+'''
 
 class Bullet(System.System):
     def __init__(self, Sprite, x_pos, y_pos, ATK, SPEED ,angle=None):
         super().__init__()
         self.sprite = Sprite # 탄환
+        self.Type = 'NORMAL'
+        self.EffectDic = {'NORMAL': pygame.image.load('ShootingGame/Sprite/Bullet/CollideEffect.png'),
+                          'MISSILE': pygame.image.load('ShootingGame/Sprite/Bullet/CollideEffect.png'),
+                          'LASER': pygame.image.load('ShootingGame/Sprite/Bullet/CollideEffect.png')}
+        self.isExist = True
+        self.Collide = False
         self.pos = pygame.math.Vector2(x_pos, y_pos) # 위치
         self.angle = angle # 탄환 발사 각도
         self.VEL = pygame.math.Vector2(0, SPEED)
@@ -19,6 +28,10 @@ class Bullet(System.System):
         self.pos.x -= self.sprite.get_width() / 2 # 위치조정
         self.HitBox = HitBox.HitBox(self.sprite, self.pos.x, self.pos.y)
         self.ATK = ATK # 공격력 설정
+        
+        self.ExistTime = 1
+        self.StartExist = 0
+        self.ElapsedExist = 0
         
     def GetPos(self, t):
         try:
@@ -30,11 +43,24 @@ class Bullet(System.System):
                 raise ValueError
         except ValueError:
             return -1
+        
+    def IsCollide(self):
+        self.Collide = True
     
     def Draw(self):
         self.GAMESCREEN.blit(self.sprite, (self.pos.x, self.pos.y))
-        self.HitBox.Draw()
+        
+    def DrawEffect(self):
+        if (self.isExist):
+            self.GAMESCREEN.blit(self.EffectDic[self.Type], (self.pos.x, self.pos.y))
 
     def Update(self):
         self.pos -= self.VEL
         self.HitBox.UpdatePos(self.pos.x, self.pos.y)
+        
+        if (not self.Collide):
+            self.StartExist = pygame.time.get_ticks()
+        else:
+            self.ElapsedExist = (pygame.time.get_ticks() - self.StartExist) / 1000
+            if (self.ElapsedExist > self.ExistTime):
+                self.isExist = False
