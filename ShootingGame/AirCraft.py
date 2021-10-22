@@ -18,6 +18,7 @@ class AirCraft(System.System):
         self.isDead = False # 사망 여부를 설정하는 변수
         self.isGetAttack = False #일단 보류...
         self.SpriteList = [samplesprite] # 스프라이트 리스트
+        self.CurSprite = self.SpriteList[self.index]
         self.index = 0 # 스프라이트 인덱스
         self.HitBox = HitBox.HitBox(self.SpriteList[self.index], self.pos.x, self.pos.y) # 히트박스 설정
         self.direction = None # 방향
@@ -57,7 +58,7 @@ class AirCraft(System.System):
         '''
         오브젝트의 위치를 나타내주는 메서드
         '''
-        self.GAMESCREEN.blit(self.SpriteList[self.index], (self.pos.x, self.pos.y))
+        self.GAMESCREEN.blit(self.CurSprite, (self.pos.x, self.pos.y))
         
     def UpdatePos(self):
         '''

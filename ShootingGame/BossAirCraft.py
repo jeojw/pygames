@@ -274,9 +274,6 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
             self.StartChange = 0
             self.ElapsedChange = 0
         
-    def DrawPos(self):
-        self.GAMESCREEN.blit(self.SpriteList[self.conindex][self.index], (self.pos.x, self.pos.y))
-        
     def DrawStat(self):
         Length = 125
         convertCoefficient = Length / self.MAXHP
@@ -365,6 +362,8 @@ class BossAirCraft(EnemyAirCraft.EnemyAirCraft):
                 self.index += 1
                 if (self.index >= len(self.SpriteList[self.conindex])):
                     self.index = 0
+        
+        self.CurSprite = self.SpriteList[self.conindex][self.index]
         
     def Update(self, Player, dt):
         

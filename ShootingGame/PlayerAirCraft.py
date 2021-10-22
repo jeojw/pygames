@@ -225,7 +225,7 @@ class PlayerAirCraft(AirCraft.AirCraft):
             elif (self.direction == 'DOWN'):
                 self.pos.y += self.VEL.y
                 
-        self.HitBox.UpdatePos(self.pos.x, self.pos.y, self.SpriteList[self.index])
+        self.HitBox.UpdatePos(self.pos.x, self.pos.y, self.CurSprite)
             
     def UpdateSprite(self):
         self.index = self.BulletStack.GetSize()
@@ -236,9 +236,11 @@ class PlayerAirCraft(AirCraft.AirCraft):
                 
         if (self.isDead):
             self.index = len(self.SpriteList) - 1
+            
+        self.CurSprite = self.SpriteList[self.index]
         
         if (self.BulletStack.GetSize() <= 2): # 스프라이트 이미지 크기를 통해 위치 재조정 할 예정(히트박스 크기 X!)
-            self.HitBox.UpdateSize(self.SpriteList[self.index])
+            self.HitBox.UpdateSize(self.CurSprite)
         
     
     def Update(self, Stage):

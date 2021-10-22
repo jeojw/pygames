@@ -9,12 +9,16 @@ import System
 탄환 충돌 시 이펙트가 출력되는 효과를 제대로 구현해 볼것 -> 일단 Bullet 클래스 내에서 구현해볼 예정
 '''
 
+effect = pygame.image.load('ShootingGame/Sprite/Bullet/CollideEffect.png')
+
+
 class Bullet(System.System):
     def __init__(self, Sprite, x_pos, y_pos, ATK, SPEED ,angle=None):
         super().__init__()
         self.sprite = Sprite # 탄환
         self.Type = 'NORMAL'
-        self.EffectDic = {'NORMAL': pygame.image.load('ShootingGame/Sprite/Bullet/CollideEffect.png'),
+        self.Object = None
+        self.EffectDic = {'NORMAL': pygame.transform.scale(effect, (20,10)),
                           'MISSILE': pygame.image.load('ShootingGame/Sprite/Bullet/CollideEffect.png'),
                           'LASER': pygame.image.load('ShootingGame/Sprite/Bullet/CollideEffect.png')}
         self.isExist = True
@@ -29,7 +33,7 @@ class Bullet(System.System):
         self.HitBox = HitBox.HitBox(self.sprite, self.pos.x, self.pos.y)
         self.ATK = ATK # 공격력 설정
         
-        self.ExistTime = 1
+        self.ExistTime = 0.1
         self.StartExist = 0
         self.ElapsedExist = 0
         
@@ -44,19 +48,26 @@ class Bullet(System.System):
         except ValueError:
             return -1
         
-    def IsCollide(self):
+    def IsCollide(self, Obj):
         self.Collide = True
+        self.Object = Obj
     
     def Draw(self):
         self.GAMESCREEN.blit(self.sprite, (self.pos.x, self.pos.y))
         
     def DrawEffect(self):
-        if (self.isExist):
-            self.GAMESCREEN.blit(self.EffectDic[self.Type], (self.pos.x, self.pos.y))
+        diffpos = pygame.math.Vector2(abs(self.EffectDic[self.Type].get_width() - self.sprite.get_width()) / 2, abs(self.EffectDic[self.Type].get_height() - self.sprite.get_height()) / 2)
+        
+        if (self.Object.Type !='BOSS'):
+            self.GAMESCREEN.blit(self.EffectDic[self.Type], (self.pos.x - diffpos.x, self.pos.y - diffpos.y))
 
+        else:
+            self.GAMESCREEN.blit(self.EffectDic[self.Type], (self.pos.x - diffpos.x, self.pos.y - diffpos.y))
     def Update(self):
-        self.pos -= self.VEL
-        self.HitBox.UpdatePos(self.pos.x, self.pos.y)
+        
+        if (not self.Collide):
+            self.pos -= self.VEL
+            self.HitBox.UpdatePos(self.pos.x, self.pos.y)
         
         if (not self.Collide):
             self.StartExist = pygame.time.get_ticks()

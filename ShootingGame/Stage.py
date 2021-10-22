@@ -83,17 +83,24 @@ class Stage(System.System):
         
         for bullet in self.PLAYER.ProjectileList:
             bullet.Draw()
+            if (bullet.Collide):
+                bullet.DrawEffect()
             
         for enemy in self.EnemyList:
             for bullet in enemy.ProjectileList:
                 bullet.Draw()
+                if (bullet.Collide):
+                    bullet.DrawEffect()
         
         if (self.BOSS.CurPattern == 'LASER'):
             for laser in self.BOSS.LaserSprite:
                 laser.Draw()
+                laser.DrawEffect()
         
         for bullet in self.BOSS.ProjectileList:
             bullet.Draw()
+            if (bullet.Collide):
+                bullet.DrawEffect()
             
         for item in self.ItemList:
             item.Draw()
@@ -108,14 +115,15 @@ class Stage(System.System):
             for enemy in self.EnemyList:
                 if (enemy.HitBox.CheckCollision(bullet.HitBox)):
                     enemy.GetAttack()
-                    bullet.IsCollide()
-                    bullet.DrawEffect()
+                    bullet.IsCollide(enemy)
                     if (not bullet.isExist):
                         self.PLAYER.ProjectileList.remove(bullet)
                     
             if (self.BOSS.HitBox.CheckCollision(bullet.HitBox)):
                 self.BOSS.GetAttack()
-                self.PLAYER.ProjectileList.remove(bullet)
+                bullet.IsCollide(self.BOSS)
+                if (not bullet.isExist):
+                    self.PLAYER.ProjectileList.remove(bullet)
             bullet.Update()
             
         for enemy in self.EnemyList:
@@ -126,7 +134,9 @@ class Stage(System.System):
                     enemy.ProjectileList.remove(bullet)
                 if (self.PLAYER.HitBox.CheckCollision(bullet.HitBox)):
                     self.PLAYER.GetAttack()
-                    enemy.ProjectileList.remove(bullet)
+                    bullet.IsCollide(self.PLAYER)
+                    if (not bullet.isExist):
+                        self.PLAYER.ProjectileList.remove(bullet)
                 bullet.Update()
         
         for bullet in self.BOSS.ProjectileList:
@@ -136,7 +146,9 @@ class Stage(System.System):
                 self.BOSS.ProjectileList.remove(bullet)
             if (self.PLAYER.HitBox.CheckCollision(bullet.HitBox)):
                 self.PLAYER.GetAttack()
-                self.BOSS.ProjectileList.remove(bullet)
+                bullet.IsCollide(self.PLAYER)
+                if (not bullet.isExist):
+                    self.PLAYER.ProjectileList.remove(bullet)
             bullet.Update()
         
         if (self.BOSS.CurPattern == 'LASER'):

@@ -18,7 +18,7 @@ class EnemyAirCraft(AirCraft.AirCraft):
         self.DEF = DEF
         self.DEF = DEF
         self.VEL = pygame.math.Vector2(0, -6)
-        self.initpos = pygame.math.Vector2(x_pos, y_pos)
+        self.initpos = pygame.math.Vector2(x_pos, y_pos) #최초 생성 좌표 후에 movement함수에서 y축 위치 조정용으로 쓰일 예정
         self.moveposy = 600
         self.movesec = 0
         
@@ -128,7 +128,9 @@ class EnemyAirCraft(AirCraft.AirCraft):
         if (self.isDead):
             self.index = len(self.SpriteList) - 1
             
-        self.HitBox.UpdateSize(self.SpriteList[self.index])
+        self.CurSprite = self.SpriteList[self.index]
+        
+        self.HitBox.UpdateSize(self.CurSprite)
     
     def Draw(self):
         self.DrawPos()
@@ -218,7 +220,7 @@ class MissileEnemy(EnemyAirCraft):
     def SetMissile(self):
         if (self.missilecount < 2):
             for i in range(-1, 2, 2):
-                self.ProjectileList.append(Bullet.Bullet(self.missile, self.HitBox.GetPos('x', True) + 30 * i, self.HitBox.GetPos('y') + self.HitBox.GetSize('h'), self.ATK, -self.MissileMovement(self.missilemove)))
+                self.ProjectileList.append(Bullet.Bullet(self.missile, self.HitBox.GetPos('x', True) + 30 * i, self.HitBox.GetPos('y') + self.HitBox.GetSize('h'), self.ATK, -self.MissileMovement(self.missilemove), 0))
             self.missilecount += 2
         
         else:
@@ -254,7 +256,8 @@ class MissileEnemy(EnemyAirCraft):
                     if (self.MissileReady):
                         self.Static()
                     else:
-                        self.pos = self.Movement(self.movesec)
+                        self.Static()
+                        #self.pos = self.Movement(self.movesec)
             
                 self.HitBox.UpdatePos(self.pos.x, self.pos.y)
         
