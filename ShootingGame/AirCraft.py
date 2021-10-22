@@ -18,8 +18,8 @@ class AirCraft(System.System):
         self.isDead = False # 사망 여부를 설정하는 변수
         self.isGetAttack = False #일단 보류...
         self.SpriteList = [samplesprite] # 스프라이트 리스트
-        self.CurSprite = self.SpriteList[self.index]
         self.index = 0 # 스프라이트 인덱스
+        self.CurSprite = self.SpriteList[self.index]
         self.HitBox = HitBox.HitBox(self.SpriteList[self.index], self.pos.x, self.pos.y) # 히트박스 설정
         self.direction = None # 방향
         

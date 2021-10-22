@@ -58,11 +58,11 @@ class Bullet(System.System):
     def DrawEffect(self):
         diffpos = pygame.math.Vector2(abs(self.EffectDic[self.Type].get_width() - self.sprite.get_width()) / 2, abs(self.EffectDic[self.Type].get_height() - self.sprite.get_height()) / 2)
         
-        if (self.Object.Type !='BOSS'):
-            self.GAMESCREEN.blit(self.EffectDic[self.Type], (self.pos.x - diffpos.x, self.pos.y - diffpos.y))
+        if (self.angle is None):
+            self.GAMESCREEN.blit(self.EffectDic[self.Type], (self.pos.x - diffpos.x, self.Object.pos.y + self.Object.CurSprite.get_height()))
 
         else:
-            self.GAMESCREEN.blit(self.EffectDic[self.Type], (self.pos.x - diffpos.x, self.pos.y - diffpos.y))
+            self.GAMESCREEN.blit(self.EffectDic[self.Type], (self.pos.x - diffpos.x, self.Object.pos.y))
     def Update(self):
         
         if (not self.Collide):
