@@ -7,6 +7,10 @@ import math
 import Queue
 import time
 
+'''
+패턴 관련 함수는 일단 시간을 이중으로 사용이 불가능하다는걸 알았기에, 나중에 다른 방식으로 구현해볼 예정.... 일단 보류함
+'''
+
 Boss = pygame.image.load('ShootingGame/Sprite/Boss/Boss_Sprite.png')
 BossLaser = [pygame.image.load('ShootingGame/Sprite/Boss/Boss_Laser_' + str(i) + '.png') for i in range(1, 8)]
 BossSpinBullet = [pygame.image.load('ShootingGame/Sprite/Boss/Boss_Spin_' + str(i) + '.png') for i in range(1, 6)]

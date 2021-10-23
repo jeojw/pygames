@@ -17,7 +17,7 @@ shield_2 = pygame.transform.scale(shield, (120, 120))
 class PlayerAirCraft(AirCraft.AirCraft):
     def __init__(self, x_pos, y_pos):
         super().__init__(x_pos, y_pos)
-        self.MAXHEARTS = 6
+        self.MAXHEARTS = 8
         self.HEARTS = 4
         self.ATK = 30 # 공격력
         self.ATKcoff = 1.2
@@ -99,7 +99,6 @@ class PlayerAirCraft(AirCraft.AirCraft):
             self.GAMESCREEN.blit(self.curShield, (self.shieldpos.x, self.shieldpos.y))
     
     def Draw(self):
-        self.HitBox.Draw()
         self.DrawPos()
         self.DrawStat()
         
@@ -156,7 +155,7 @@ class PlayerAirCraft(AirCraft.AirCraft):
             self.HitBox.UpdateSize(self.curShield)
     
     def UpdateCondition(self, Stage):
-        
+        '''
         if (self.isAttack and not self.isDead):
             self.SetBullets(self.BulletStack.GetSize())
             self.isAttack = False
@@ -167,7 +166,7 @@ class PlayerAirCraft(AirCraft.AirCraft):
             self.isAttack = True
             self.ElapsedCool = 0
             self.StartCool = 0
-        
+        '''
         
         if (self.isGetAttack):
             if (not self.isShield):

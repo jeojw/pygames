@@ -220,7 +220,7 @@ class MissileEnemy(EnemyAirCraft):
     def SetMissile(self):
         if (self.missilecount < 2):
             for i in range(-1, 2, 2):
-                self.ProjectileList.append(Bullet.Bullet(self.missile, self.HitBox.GetPos('x', True) + 30 * i, self.HitBox.GetPos('y') + self.HitBox.GetSize('h'), self.ATK, -self.MissileMovement(self.missilemove), 0))
+                self.ProjectileList.append(Bullet.Bullet(self.missile, self.HitBox.GetPos('x', True) + 30 * i, self.HitBox.GetPos('y') + self.HitBox.GetSize('h'), self.ATK * 2, self.MissileMovement(self.missilemove), 180))
             self.missilecount += 2
         
         else:
